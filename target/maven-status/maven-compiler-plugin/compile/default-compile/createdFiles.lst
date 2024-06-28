@@ -1,0 +1,6 @@
+com/mycompany/securepasswordmanager/App.class
+module-info.class
+com/mycompany/securepasswordmanager/SecondaryController.class
+com/mycompany/securepasswordmanager/NewUserController.class
+com/mycompany/securepasswordmanager/LoginController.class
+com/mycompany/securepasswordmanager/PrimaryController.class
