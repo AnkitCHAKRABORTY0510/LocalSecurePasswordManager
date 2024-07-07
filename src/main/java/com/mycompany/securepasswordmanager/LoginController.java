@@ -169,6 +169,6 @@ public class LoginController {
     // function to switch to main screen
     @FXML
     private void switchToMainScreen() throws IOException {   
-        App.setRoot("MainScreen");
+        App.setRoot("MainView");
     }   
 }

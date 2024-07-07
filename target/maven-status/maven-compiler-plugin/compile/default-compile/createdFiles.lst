@@ -1,6 +1,10 @@
+com/mycompany/securepasswordmanager/DatabaseConnection.class
+com/mycompany/securepasswordmanager/UserDetailsController.class
+com/mycompany/securepasswordmanager/DatabaseConnection$DatabaseConnectionException.class
+com/mycompany/securepasswordmanager/View2Controller.class
 com/mycompany/securepasswordmanager/App.class
+com/mycompany/securepasswordmanager/View3Controller.class
 module-info.class
+com/mycompany/securepasswordmanager/MainController.class
 com/mycompany/securepasswordmanager/NewUserController.class
 com/mycompany/securepasswordmanager/LoginController.class
-com/mycompany/securepasswordmanager/DatabaseConnection.class
-com/mycompany/securepasswordmanager/DatabaseConnection$DatabaseConnectionException.class
