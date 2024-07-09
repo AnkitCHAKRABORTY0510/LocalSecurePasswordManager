@@ -1,4 +1,3 @@
-com/mycompany/securepasswordmanager/PasswordUtils.class
 com/mycompany/securepasswordmanager/Database.class
 com/mycompany/securepasswordmanager/UserDetailsController.class
 com/mycompany/securepasswordmanager/View2Controller.class
@@ -8,4 +7,3 @@ module-info.class
 com/mycompany/securepasswordmanager/MainController.class
 com/mycompany/securepasswordmanager/NewUserController.class
 com/mycompany/securepasswordmanager/LoginController.class
-com/mycompany/securepasswordmanager/SecureRandomUtils.class
