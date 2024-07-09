@@ -1,5 +1,7 @@
-/Users/mac/Projects-NIC/SecurePasswordManager/src/main/java/com/mycompany/securepasswordmanager/DatabaseConnection.java
+/Users/mac/Projects-NIC/SecurePasswordManager/src/main/java/com/mycompany/securepasswordmanager/PasswordUtils.java
 /Users/mac/Projects-NIC/SecurePasswordManager/src/main/java/com/mycompany/securepasswordmanager/UserDetailsController.java
+/Users/mac/Projects-NIC/SecurePasswordManager/src/main/java/com/mycompany/securepasswordmanager/SecureRandomUtils.java
+/Users/mac/Projects-NIC/SecurePasswordManager/src/main/java/com/mycompany/securepasswordmanager/Database.java
 /Users/mac/Projects-NIC/SecurePasswordManager/src/main/java/com/mycompany/securepasswordmanager/NewUserController.java
 /Users/mac/Projects-NIC/SecurePasswordManager/src/main/java/com/mycompany/securepasswordmanager/LoginController.java
 /Users/mac/Projects-NIC/SecurePasswordManager/src/main/java/com/mycompany/securepasswordmanager/View3Controller.java
