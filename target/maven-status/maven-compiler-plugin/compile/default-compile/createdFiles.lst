@@ -7,3 +7,4 @@ module-info.class
 com/mycompany/securepasswordmanager/MainController.class
 com/mycompany/securepasswordmanager/NewUserController.class
 com/mycompany/securepasswordmanager/LoginController.class
+com/mycompany/securepasswordmanager/DatabaseEncryptor.class
