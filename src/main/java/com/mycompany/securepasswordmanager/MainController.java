@@ -16,17 +16,34 @@ import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 
 import java.io.IOException;
+import javafx.scene.control.Label;
 
 public class MainController {
     @FXML
     private Pane contentPane;
+    
+    @FXML
+    private Label UserName;
+    
+    @FXML
+    public void initialize() {
+        UserSession session = UserSession.getInstance();
+        String username = session.getUsername();
+        
+        UserName.setText("Username : "+username);
+        
+        
+        
 
+        // You can now use the username and password as needed
+    }
+    
     public void loadUserDetails() {
         loadFXMLIntoPane("UserDetails.fxml");
     }
 
-    public void loadView2() {
-        loadFXMLIntoPane("View2.fxml");
+    public void loadViewPassword() {
+        loadFXMLIntoPane("ViewPassword.fxml");
     }
 
     public void loadView3() {

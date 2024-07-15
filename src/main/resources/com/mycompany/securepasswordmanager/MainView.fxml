@@ -25,7 +25,7 @@
          <children>
             <AnchorPane prefHeight="490.0" prefWidth="259.0" style="-fx-background-color: #E0E5EB;" VBox.vgrow="ALWAYS">
                <children>
-                  <Label alignment="CENTER" contentDisplay="CENTER" layoutX="5.0" layoutY="18.0" prefHeight="22.0" prefWidth="250.0" text="User Name" textAlignment="CENTER" AnchorPane.topAnchor="18.0">
+                  <Label fx:id="UserName" alignment="CENTER" contentDisplay="CENTER" layoutX="-1.0" layoutY="2.0" prefHeight="47.0" prefWidth="252.0" text="User Name" textAlignment="CENTER" AnchorPane.topAnchor="2.0">
                      <font>
                         <Font name="Arial Black" size="14.0" />
                      </font>
@@ -46,7 +46,7 @@
                   </Label>
                   <TilePane layoutX="18.0" layoutY="54.0" prefHeight="151.0" prefWidth="215.0" AnchorPane.leftAnchor="18.0" AnchorPane.rightAnchor="22.0">
                      <children>
-                        <Button alignment="TOP_LEFT" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="29.0" prefWidth="212.0" style="-fx-background-color: #E3F2FD;" text="VIEW ALL PASSWORDS" textFill="#211573" wrapText="true">
+                        <Button alignment="TOP_LEFT" contentDisplay="CENTER" mnemonicParsing="false" onAction="#loadViewPassword" prefHeight="29.0" prefWidth="212.0" style="-fx-background-color: #E3F2FD;" text="VIEW ALL PASSWORDS" textFill="#211573" wrapText="true">
                            <font>
                               <Font name="Arial Black" size="13.0" />
                            </font>

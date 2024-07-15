@@ -25,6 +25,9 @@ public class UserDetailsController {
 
     @FXML
     private ImageView UserPasswordToggle;
+    
+    @FXML
+    private Label UserNameLabel;
 
     private boolean isPasswordVisible = false;
     
@@ -33,6 +36,11 @@ public class UserDetailsController {
 
     @FXML
     public void initialize() {
+        
+        UserSession session = UserSession.getInstance();
+        String username = session.getUsername();
+        
+        UserNameLabel.setText(username);
         
         // Set initial visibility and manage properties
         UserPasswordTextField.managedProperty().bind(UserPasswordTextField.visibleProperty());
