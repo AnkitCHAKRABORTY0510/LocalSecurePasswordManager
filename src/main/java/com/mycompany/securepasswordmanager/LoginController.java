@@ -31,6 +31,10 @@ public class LoginController {
         if (!UserNameTextField.getText().isBlank() && !PasswordTextField.getText().isBlank()) {
             if (validateLogin(UserNameTextField.getText(), PasswordTextField.getText())) {
                 try {
+                    
+                    UserSession session = UserSession.getInstance();
+                    session.setUsername(UserNameTextField.getText());
+                    
                     switchToMainScreen();
                 } catch (IOException ex) {
                     Logger.getLogger(LoginController.class.getName()).log(Level.SEVERE, null, ex);
@@ -52,9 +56,9 @@ public class LoginController {
         App.setRoot("NewUser");
     }
 
-    // function to switch to the main screen
+  
     @FXML
     private void switchToMainScreen() throws IOException {
-        App.setRoot("MainView");
+        App.setRoot("MainView", 1024, 768); // Set your desired resolution here
     }
 }

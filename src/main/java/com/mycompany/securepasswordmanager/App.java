@@ -55,6 +55,17 @@ public class App extends Application {
     static void setRoot(String fxml) throws IOException {
         scene.setRoot(loadFXML(fxml));
     }
+    
+    static void setRoot(String fxml, double width, double height) throws IOException {
+        Parent root = loadFXML(fxml);
+        scene.setRoot(root);
+        Stage stage = (Stage) scene.getWindow();
+        stage.setWidth(width);
+        stage.setHeight(height);
+        // Apply the inline CSS for fonts
+        scene.getRoot().setStyle("-fx-font-family: 'Arial'; -fx-font-size: 14px;");
+        
+    }
 
     private static Parent loadFXML(String fxml) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
