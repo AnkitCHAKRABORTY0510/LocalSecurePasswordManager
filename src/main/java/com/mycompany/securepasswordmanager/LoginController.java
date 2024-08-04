@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.securepasswordmanager;
 
 import javafx.event.ActionEvent;
@@ -26,14 +22,14 @@ public class LoginController {
     @FXML
     private Label CreateUserMessage;
 
-    // method for when the login button is pressed
     public void LoginButtonOn(ActionEvent e) throws SQLException, NoSuchAlgorithmException {
         if (!UserNameTextField.getText().isBlank() && !PasswordTextField.getText().isBlank()) {
             if (validateLogin(UserNameTextField.getText(), PasswordTextField.getText())) {
                 try {
-                    
                     UserSession session = UserSession.getInstance();
                     session.setUsername(UserNameTextField.getText());
+                    session.setUserID(Database.getUserID(UserNameTextField.getText()));
+                    session.initializeDatabase();
                     
                     switchToMainScreen();
                 } catch (IOException ex) {
@@ -51,14 +47,15 @@ public class LoginController {
         return Database.validateLogin(username, password);
     }
 
+    
+
     @FXML
     private void switchToNewUser() throws IOException {
         App.setRoot("NewUser");
     }
 
-  
     @FXML
     private void switchToMainScreen() throws IOException {
-        App.setRoot("MainView", 1024, 768); // Set your desired resolution here
+        App.setRoot("MainView", 1024, 768);
     }
 }

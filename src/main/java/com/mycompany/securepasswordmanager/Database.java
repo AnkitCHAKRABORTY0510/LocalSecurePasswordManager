@@ -1,13 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.securepasswordmanager;
-
-/**
- *
- * @author mac
- */
 
 import java.io.File;
 import java.security.NoSuchAlgorithmException;
@@ -35,17 +26,22 @@ public class Database {
         }
         return conn;
     }
-    public static void createNewTable() {
-        String sql = "CREATE TABLE IF NOT EXISTS users (\n"
+
+    public static void createNewTables() {
+        String createUsersTable = "CREATE TABLE IF NOT EXISTS users (\n"
                 + " id INTEGER PRIMARY KEY,\n"
                 + " username TEXT NOT NULL,\n"
                 + " password TEXT NOT NULL,\n"
-                + " salt TEXT NOT NULL\n"
+                + " salt TEXT NOT NULL,\n"
+                + " user_id TEXT UNIQUE NOT NULL\n"
                 + ");";
+
+        
 
         try (Connection conn = connect();
              Statement stmt = conn.createStatement()) {
-            stmt.execute(sql);
+            stmt.execute(createUsersTable);
+            
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -67,17 +63,33 @@ public class Database {
         return false;
     }
 
-    public static void insertUser(String username, String password, String salt) {
-        String sql = "INSERT INTO users(username, password, salt) VALUES(?,?,?)";
+    public static void insertUser(String username, String password, String salt, String userID) {
+        String sql = "INSERT INTO users(username, password, salt, user_id) VALUES(?,?,?,?)";
 
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
             pstmt.setString(2, password);
             pstmt.setString(3, salt);
+            pstmt.setString(4, userID);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
+
+    public static String getUserID(String username) throws SQLException {
+        String sql = "SELECT user_id FROM users WHERE username = ?";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("user_id");
+            }
+        }
+        return null;
+    }
+
+
 }

@@ -22,11 +22,11 @@
         </dependency>
         <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
         <!-- Add mysql-connector-java-->
-        <dependency>
+<!--        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.33</version>
-        </dependency>
+        </dependency>-->
         <!-- Add SQLite dependency -->
         <dependency>
             <groupId>org.xerial</groupId>

@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.securepasswordmanager;
 
 import javafx.event.ActionEvent;
@@ -19,6 +15,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Base64;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,7 +29,6 @@ public class NewUserController {
     @FXML
     private Label CreateUserMessage;
 
-    // method to create a new user
     public void LoginButtonOn(ActionEvent e) {
         if (!UserNameTextField.getText().isBlank() && !PasswordTextField.getText().isBlank()) {
             try {
@@ -50,13 +46,11 @@ public class NewUserController {
         }
     }
 
-    // function to switch to login screen
     @FXML
     private void switchToLogin() throws IOException {
         App.setRoot("login");
     }
 
-    // function to create a new user
     private boolean CreateNewUser(String username, String password) throws SQLException, NoSuchAlgorithmException {
         if (userExists(username)) {
             return false;
@@ -64,12 +58,13 @@ public class NewUserController {
 
         String salt = generateSalt();
         String hashedPassword = hashPassword(password, salt);
+        String userID = generateUserID();
 
-        Database.insertUser(username, hashedPassword, salt);
+        Database.insertUser(username, hashedPassword, salt, userID);
+        
         return true;
     }
 
-    // function to check if a user already exists
     private boolean userExists(String username) throws SQLException {
         String sql = "SELECT * FROM users WHERE username = ?";
 
@@ -80,7 +75,6 @@ public class NewUserController {
         }
     }
 
-    // function to generate a random salt
     private String generateSalt() {
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[16];
@@ -88,11 +82,16 @@ public class NewUserController {
         return Base64.getEncoder().encodeToString(salt);
     }
 
-    // function to hash the password with the salt
     public static String hashPassword(String password, String salt) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         md.update(salt.getBytes(StandardCharsets.UTF_8));
         byte[] hashedPassword = md.digest(password.getBytes(StandardCharsets.UTF_8));
         return Base64.getEncoder().encodeToString(hashedPassword);
     }
+
+    private String generateUserID() {
+        return UUID.randomUUID().toString();
+    }
+
+
 }

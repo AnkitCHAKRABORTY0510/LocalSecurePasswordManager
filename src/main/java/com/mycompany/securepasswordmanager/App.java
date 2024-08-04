@@ -43,7 +43,7 @@ public class App extends Application {
 
         // Initialize database if it doesn't exist
         if (!Files.exists(Paths.get(DATABASE_FILE))) {
-            Database.createNewTable();
+            Database.createNewTables();
         }
 
         // Load the initial login scene
