@@ -10,13 +10,13 @@ public class UserSession {
     private static UserSession instance;
     private String username;
     private String userID;
-    private String UserPassword;
-    private String UserEmail;
-    private String UserPhoneNo;
-    private String UserDateandTimeofcreation;
-    private String UserAvatarpath;
-    
-    
+    private String firstName;
+    private String lastName;
+    private String emailId;
+    private String phoneNumber;
+    private String userCreationDate;
+    private String userCreationTime;
+    private String userPassword;//not encrypted
 
     private static final String DB_URL_PREFIX = "jdbc:sqlite:data/users/";
 
@@ -30,7 +30,14 @@ public class UserSession {
         }
         return instance;
     }
+    
+    // Method to reset the UserSession instance
+    public static synchronized void logout() {
+        instance = null;
+    }
 
+
+    // Getters and Setters
     public String getUsername() {
         return username;
     }
@@ -38,6 +45,15 @@ public class UserSession {
     public void setUsername(String username) {
         this.username = username;
     }
+    
+    public void setUserpassword(String userPassword) {
+        this.userPassword = userPassword;//not encripted
+    }
+    
+    public String getUserpassword() {
+        return userPassword;//not encripted
+    }
+    
 
     public String getUserID() {
         return userID;
@@ -45,6 +61,60 @@ public class UserSession {
 
     public void setUserID(String userID) {
         this.userID = userID;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getUserCreationDate() {
+        return userCreationDate;
+    }
+
+    public void setUserCreationDate(String userCreationDate) {
+        this.userCreationDate = userCreationDate;
+    }
+
+    public String getUserCreationTime() {
+        return userCreationTime;
+    }
+
+    public void setUserCreationTime(String userCreationTime) {
+        this.userCreationTime = userCreationTime;
+    }
+
+    public String getEmailId() {
+        return emailId;
+    }
+
+    public void setEmailId(String emailId) {
+        this.emailId = emailId;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+    
+    // Helper method to split date and time
+    public void setUserCreationDateTime(String dateTime) {
+        this.userCreationDate = dateTime.split("T")[0];
+        this.userCreationTime = dateTime.split("T")[1];
     }
 
     public void initializeDatabase() {
@@ -89,6 +159,6 @@ public class UserSession {
     }
     
     public String getDatabasePath(String userID) {
-    return "jdbc:sqlite:data/users/" + userID + ".db";
-}
+        return DB_URL_PREFIX + userID + ".db";
+    }
 }

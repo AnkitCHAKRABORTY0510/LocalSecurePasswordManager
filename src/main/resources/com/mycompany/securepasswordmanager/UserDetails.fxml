@@ -84,7 +84,7 @@
                                           <Insets bottom="5.0" right="5.0" />
                                        </HBox.margin>
                                     </Label>
-                                    <TextField editable="false" prefHeight="38.0" prefWidth="280.0" promptText="First name">
+                                    <TextField fx:id="firstNameField" editable="false" prefHeight="38.0" prefWidth="280.0" promptText="First name">
                                        <HBox.margin>
                                           <Insets bottom="5.0" />
                                        </HBox.margin></TextField>
@@ -103,7 +103,7 @@
                                           <Insets bottom="5.0" right="5.0" />
                                        </HBox.margin>
                                     </Label>
-                                    <TextField editable="false" prefHeight="38.0" prefWidth="280.0" promptText="Last name">
+                                    <TextField fx:id="lastNameField" editable="false" prefHeight="38.0" prefWidth="280.0" promptText="Last name">
                                        <HBox.margin>
                                           <Insets bottom="5.0" />
                                        </HBox.margin></TextField>
@@ -161,7 +161,7 @@
                                           <Insets bottom="5.0" right="5.0" />
                                        </HBox.margin>
                                     </Label>
-                                    <TextField editable="false" prefHeight="38.0" prefWidth="280.0" promptText="PHONE No" />
+                                    <TextField fx:id="phoneField" editable="false" prefHeight="38.0" prefWidth="280.0" promptText="PHONE No" />
                                  </children>
                                  <padding>
                                     <Insets top="2.0" />
@@ -179,8 +179,8 @@
                                     </Label>
                                     <VBox prefHeight="77.0" prefWidth="279.0">
                                        <children>
-                                          <TextField alignment="CENTER" editable="false" prefHeight="38.0" prefWidth="280.0" promptText="DATE" />
-                                          <TextField alignment="CENTER" editable="false" layoutX="10.0" layoutY="10.0" prefHeight="38.0" prefWidth="280.0" promptText="TIME" />
+                                          <TextField fx:id="dateField" alignment="CENTER" editable="false" prefHeight="38.0" prefWidth="280.0" promptText="DATE" />
+                                          <TextField fx:id="timeField" alignment="CENTER" editable="false" layoutX="10.0" layoutY="10.0" prefHeight="38.0" prefWidth="280.0" promptText="TIME" />
                                        </children>
                                     </VBox>
                                  </children>
@@ -198,7 +198,7 @@
                                           <Insets right="5.0" top="5.0" />
                                        </HBox.margin>
                                     </Label>
-                                    <TextField editable="false" prefHeight="38.0" prefWidth="280.0" promptText="USER ID">
+                                    <TextField fx:id="userIDField" editable="false" prefHeight="38.0" prefWidth="280.0" promptText="USER ID">
                                        <HBox.margin>
                                           <Insets top="5.0" />
                                        </HBox.margin></TextField>
@@ -217,7 +217,7 @@
                                           <Insets right="5.0" top="5.0" />
                                        </HBox.margin>
                                     </Label>
-                                    <TextField editable="false" prefHeight="38.0" prefWidth="280.0" promptText="EMAIl">
+                                    <TextField fx:id="emailField" editable="false" prefHeight="38.0" prefWidth="280.0" promptText="EMAIl">
                                        <HBox.margin>
                                           <Insets top="5.0" />
                                        </HBox.margin></TextField>

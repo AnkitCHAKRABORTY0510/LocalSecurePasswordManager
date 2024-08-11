@@ -9,6 +9,10 @@ import javafx.scene.control.TextField;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,6 +52,38 @@ public class LoginController {
         // Set up the toggle event listener
         addToggleEventListener();
     }
+    
+    
+    public void fetchAndSetUserDetails(String userID) throws SQLException {
+        UserSession session = UserSession.getInstance();
+
+        String query = "SELECT first_name, last_name, email_id, phone_number, user_creation_time, user_id FROM userinformation WHERE user_id = ?";
+
+        try (Connection connection = DriverManager.getConnection(session.getDatabasePath(userID));
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            preparedStatement.setString(1, userID);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                session.setFirstName(resultSet.getString("first_name"));
+                session.setLastName(resultSet.getString("last_name"));
+                session.setEmailId(resultSet.getString("email_id"));
+                session.setPhoneNumber(resultSet.getString("phone_number"));
+
+                // Assuming user_creation_time is stored as 'YYYY-MM-DDTHH:MM:SS'
+                String dateTime = resultSet.getString("user_creation_time");
+                session.setUserCreationDateTime(dateTime);
+
+                session.setUserID(resultSet.getString("user_id"));
+            } else {
+                System.err.println("User details not found in the database for userID: " + userID);
+            }
+
+        }    }
+
+    // Example usage in the login button action method
     public void LoginButtonOn(ActionEvent e) throws SQLException, NoSuchAlgorithmException {
         if (!UserNameTextField.getText().isBlank() && !PasswordTextField.getText().isBlank()) {
             if (validateLogin(UserNameTextField.getText(), PasswordTextField.getText())) {
@@ -55,8 +91,14 @@ public class LoginController {
                     UserSession session = UserSession.getInstance();
                     session.setUsername(UserNameTextField.getText());
                     session.setUserID(Database.getUserID(UserNameTextField.getText()));
+                    session.setUserpassword(PasswordTextField.getText());
+
+                    // Fetch and set user details
+                    fetchAndSetUserDetails(session.getUserID());
+
+                    // Optionally initialize the user's database
                     session.initializeDatabase();
-                    
+
                     switchToMainScreen();
                 } catch (IOException ex) {
                     Logger.getLogger(LoginController.class.getName()).log(Level.SEVERE, null, ex);
@@ -68,7 +110,8 @@ public class LoginController {
             CreateUserMessage.setText("Please Enter username and password!!");
         }
     }
-
+    
+    
     private boolean validateLogin(String username, String password) throws SQLException, NoSuchAlgorithmException {
         return Database.validateLogin(username, password);
     }
@@ -82,7 +125,7 @@ public class LoginController {
 
     @FXML
     private void switchToMainScreen() throws IOException {
-        App.setRoot("MainView", 1200, 768);
+        App.setRoot("MainView", 1200, 800);
     }
     
     @FXML

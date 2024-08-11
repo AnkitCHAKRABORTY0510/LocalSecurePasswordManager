@@ -1,43 +1,56 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.securepasswordmanager;
 
-/**
- *
- * @author mac
- */
 
-
+import java.io.IOException;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.layout.Pane;
-
-import java.io.IOException;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class MainController {
+
     @FXML
     private Pane contentPane;
-    
+
     @FXML
     private Label UserName;
     
+    private String username;
+
     @FXML
     public void initialize() {
         UserSession session = UserSession.getInstance();
-        String username = session.getUsername();
-        
-        UserName.setText("Username : "+username);
-        
-        
-        
+        username = session.getUsername();
 
-        // You can now use the username and password as needed
+        UserName.setText("WELCOME ! " + username);
     }
-    
+
+ 
+@FXML
+public void handleLogout() {
+    // Perform logout
+    UserSession.getInstance().logout();
+
+    try {
+        
+        showAlert("Logout Message", username + " - Logout Successful !") ; 
+        App.setRoot("login", 900, 600);
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+
     public void loadUserDetails() {
         loadFXMLIntoPane("UserDetails.fxml");
     }
@@ -58,5 +71,35 @@ public class MainController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    
+    
+   private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+
+       DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.setMinHeight(Region.USE_PREF_SIZE);
+        dialogPane.setStyle("-fx-font-family: 'Arial'; -fx-font-size: 14px;");
+
+        // Set the owner of the alert to the main application window
+        Stage ownerStage = (Stage) UserName.getScene().getWindow(); // Replace 'someNode' with a node in your current scene
+        alert.initOwner(ownerStage);
+
+        // Set modality to ensure the alert is modal
+        alert.initModality(Modality.APPLICATION_MODAL);
+
+        // Optionally, set the preferred size
+        dialogPane.setPrefSize(300, 120); // Adjust as needed
+        
+        // Create a Timeline that will close the alert after 10 seconds
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(5), event -> alert.close()));
+        timeline.setCycleCount(1);
+        timeline.play();
+
+        alert.show();
     }
 }

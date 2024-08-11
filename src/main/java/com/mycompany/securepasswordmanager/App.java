@@ -48,7 +48,7 @@ public class App extends Application {
         }
 
         // Load the initial login scene
-        scene = new Scene(loadFXML("login"), 900, 550);
+        scene = new Scene(loadFXML("login"), 900, 600);
         
         stage.setScene(scene);
         stage.show();
