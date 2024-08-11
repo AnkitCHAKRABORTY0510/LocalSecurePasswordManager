@@ -60,6 +60,7 @@ public class UserDetailsController {
         
         // Add click listener to the ImageView (toggle button)
         UserPasswordToggle.setOnMouseClicked(this::handleTogglePasswordVisibility);
+        System.out.println("toggle me");
     }
 
    @FXML

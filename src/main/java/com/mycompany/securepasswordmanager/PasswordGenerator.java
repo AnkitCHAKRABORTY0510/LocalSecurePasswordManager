@@ -10,6 +10,8 @@ import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
+
+//functions to generate random password not the encryption part
 public class PasswordGenerator {
 
     public static PasswordData generatePassword(int passwordLength) {

@@ -25,14 +25,10 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.scene.control.Label;
-import javafx.scene.layout.AnchorPane;
-import javafx.stage.Modality;
-import javafx.util.Duration;
 
-public class AddNewPasswordDialogController {
+import javafx.scene.layout.AnchorPane;
+
+public class EditPasswordDialogController {
 
     @FXML
     private DialogPane dialogPane;
@@ -42,6 +38,13 @@ public class AddNewPasswordDialogController {
 
     @FXML
     private TextField passwordField;
+    
+    @FXML
+    private TextField CurrentUrlField;
+
+    @FXML
+    private TextField CurrentPasswordField;
+
 
     @FXML
     private TextArea descriptionArea;
@@ -60,14 +63,8 @@ public class AddNewPasswordDialogController {
     private int passwordLength = 15; // Default password length
     @FXML
     private AnchorPane OK;
-    @FXML
-    private Label currentPassword;
-    @FXML
-    private Label currentPassword1;
-    @FXML
-    private TextField passwordField1;
-    @FXML
-    private TextField urlField1;
+   
+    private PasswordData passwordData;
 
     public void setDialog(Dialog<Void> dialog) {
         this.dialog = dialog;
@@ -114,13 +111,13 @@ public class AddNewPasswordDialogController {
         String description = descriptionArea.getText();
 
         if (url == null || url.trim().isEmpty()) {
-            showAlert("Validation Error", "URL cannot be empty.");
-            return false;
+            urlField.setText(CurrentUrlField.getText());
+            return true;
         }
 
         if (password == null || password.trim().isEmpty()) {
-            showAlert("Validation Error", "Password cannot be empty.");
-            return false;
+            passwordField.setText(CurrentPasswordField.getText());
+            return true;
         }
 
         return true;
@@ -129,6 +126,13 @@ public class AddNewPasswordDialogController {
     private void closeDialog() {
         Stage stage = (Stage) dialogPane.getScene().getWindow();
         stage.close();
+    }
+    
+    public void setPasswordData(PasswordData passwordData) {
+        this.passwordData = passwordData;
+        CurrentUrlField.setText(passwordData.getUrl());
+        CurrentPasswordField.setText(passwordData.getEncryptedPassword());
+        descriptionArea.setText(passwordData.getDescription());
     }
     
     
@@ -162,22 +166,7 @@ public class AddNewPasswordDialogController {
         dialogPane.setMinHeight(Region.USE_PREF_SIZE);
         dialogPane.setStyle("-fx-font-family: 'Arial'; -fx-font-size: 14px;");
 
-        // Set the owner of the alert to the main application window
-        Stage ownerStage = (Stage) ADD.getScene().getWindow(); // Replace 'someNode' with a node in your current scene
-        alert.initOwner(ownerStage);
-
-        // Set modality to ensure the alert is modal
-        alert.initModality(Modality.APPLICATION_MODAL);
-
-        // Optionally, set the preferred size
-        dialogPane.setPrefSize(300, 120); // Adjust as needed
-        
-          // Create a Timeline that will close the alert after 10 seconds
-        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(5), event -> alert.close()));
-        timeline.setCycleCount(1);
-        timeline.play();
         alert.showAndWait();
-        
     }
 
     private byte[] generateSalt() {
@@ -216,32 +205,37 @@ public class AddNewPasswordDialogController {
         byte[] salt = generateSalt();
         String encryptedPasswordWithSalt = encryptPassword(originalPassword, salt);
         if (encryptedPasswordWithSalt != null) {
-            storePasswordInDatabase(url, encryptedPasswordWithSalt, description);
+            savePassword(url, encryptedPasswordWithSalt, description);
         }
     }
 
-    private void storePasswordInDatabase(String url, String encryptedPasswordWithSalt, String description) {
+    private void savePassword(String newUrl, String encryptedPasswordWithSalt, String newDescription) {
+        
         String[] parts = encryptedPasswordWithSalt.split(":");
         String salt = parts[0];
-        String encryptedPassword = parts[1];
-
+        String newPassword = parts[1];
+        
         UserSession userSession = UserSession.getInstance();
-        String dbUrl = "jdbc:sqlite:Data/Users/" + userSession.getUserID() + ".db";
-        String insertSQL = "INSERT INTO passwords (url, salt, encrypted_password, description, username) VALUES (?, ?, ?, ?, ?)";
-
+        String dbUrl = "jdbc:sqlite:data/users/" + userSession.getUserID() + ".db";
+        String updateSQL = "UPDATE passwords SET url = ?, encrypted_password = ?, salt = ?, description = ? WHERE id = ?";
+        
         try (Connection connection = DriverManager.getConnection(dbUrl);
-             PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
+             PreparedStatement statement = connection.prepareStatement(updateSQL)) {
 
-            preparedStatement.setString(1, url);
-            preparedStatement.setString(2, salt);
-            preparedStatement.setString(3, encryptedPassword);
-            preparedStatement.setString(4, description);
-            preparedStatement.setString(5, userSession.getUsername());
+            statement.setString(1, newUrl);
+            statement.setString(2, newPassword);
+            statement.setString(3, salt);
+            statement.setString(4, newDescription);
+            statement.setInt(5, passwordData.getId());
 
-            preparedStatement.executeUpdate();
+            statement.executeUpdate();
+
+            closeDialog();
+
         } catch (SQLException e) {
             e.printStackTrace();
-            showAlert("Error", "Failed to store password in database.");
+            showAlert("Error", "Failed to update password.");
         }
     }
+
 }

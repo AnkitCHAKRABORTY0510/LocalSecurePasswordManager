@@ -46,6 +46,16 @@ public class Database {
             System.out.println(e.getMessage());
         }
     }
+    
+    public static boolean userExists(String username) throws SQLException {
+        String sql = "SELECT * FROM users WHERE username = ?";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            return rs.next();
+            }
+    }
 
     public static boolean validateLogin(String username, String password) throws SQLException, NoSuchAlgorithmException {
         String sql = "SELECT * FROM users WHERE username = ?";

@@ -10,6 +10,13 @@ public class UserSession {
     private static UserSession instance;
     private String username;
     private String userID;
+    private String UserPassword;
+    private String UserEmail;
+    private String UserPhoneNo;
+    private String UserDateandTimeofcreation;
+    private String UserAvatarpath;
+    
+    
 
     private static final String DB_URL_PREFIX = "jdbc:sqlite:data/users/";
 
@@ -58,8 +65,7 @@ public class UserSession {
                                         "username TEXT PRIMARY KEY," +
                                         "first_name TEXT," +
                                         "last_name TEXT," +
-                                        "last_login_time TEXT," +
-                                        "date_of_birth TEXT," +
+                                        "user_creation_time TEXT," +
                                         "email_id TEXT," +
                                         "phone_number TEXT," +
                                         "user_id TEXT UNIQUE" +
@@ -81,4 +87,8 @@ public class UserSession {
             e.printStackTrace();
         }
     }
+    
+    public String getDatabasePath(String userID) {
+    return "jdbc:sqlite:data/users/" + userID + ".db";
+}
 }

@@ -12,3 +12,4 @@ com/mycompany/securepasswordmanager/Database.class
 com/mycompany/securepasswordmanager/View3Controller.class
 com/mycompany/securepasswordmanager/MainController.class
 com/mycompany/securepasswordmanager/LoginController.class
+com/mycompany/securepasswordmanager/EditPasswordDialogController.class

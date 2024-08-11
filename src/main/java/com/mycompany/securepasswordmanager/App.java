@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import javafx.scene.layout.Region;
 
 public class App extends Application {
 
@@ -47,7 +48,8 @@ public class App extends Application {
         }
 
         // Load the initial login scene
-        scene = new Scene(loadFXML("login"), 640, 480);
+        scene = new Scene(loadFXML("login"), 900, 550);
+        
         stage.setScene(scene);
         stage.show();
     }
@@ -69,6 +71,9 @@ public class App extends Application {
 
     private static Parent loadFXML(String fxml) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
+        
+
+        
         return fxmlLoader.load();
     }
 
