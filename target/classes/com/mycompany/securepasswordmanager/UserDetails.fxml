@@ -114,7 +114,7 @@
                               </HBox>
                               <HBox prefHeight="14.0" prefWidth="437.0">
                                  <children>
-                                    <Label alignment="CENTER" prefHeight="35.0" prefWidth="114.0" style="-fx-background-color: #bcbec4; -fx-background-radius: 3;" text="Password" textAlignment="CENTER">
+                                    <Label alignment="CENTER" prefHeight="35.0" prefWidth="105.0" style="-fx-background-color: #bcbec4; -fx-background-radius: 3;" text="Password" textAlignment="CENTER">
                                        <font>
                                           <Font name="Avenir Black" size="14.0" />
                                        </font>
@@ -125,7 +125,7 @@
                                     <AnchorPane prefHeight="40.0" prefWidth="287.0">
                                        <children>
                                           <TextField fx:id="UserPasswordTextField" editable="false" prefHeight="38.0" prefWidth="275.0" promptText="password text" />
-                                          <PasswordField fx:id="UserPasswordPasswordField" editable="false" layoutX="1.0" prefHeight="38.0" prefWidth="275.0" promptText="password field" AnchorPane.leftAnchor="0.0" />
+                                          <PasswordField fx:id="UserPasswordPasswordField" editable="false" layoutX="1.0" prefHeight="38.0" prefWidth="281.0" promptText="password field" AnchorPane.leftAnchor="0.0" />
                                        </children>
                                        <padding>
                                           <Insets bottom="2.0" />
@@ -179,8 +179,8 @@
                                     </Label>
                                     <VBox prefHeight="77.0" prefWidth="279.0">
                                        <children>
-                                          <TextField fx:id="dateField" alignment="CENTER" editable="false" prefHeight="38.0" prefWidth="280.0" promptText="DATE" />
-                                          <TextField fx:id="timeField" alignment="CENTER" editable="false" layoutX="10.0" layoutY="10.0" prefHeight="38.0" prefWidth="280.0" promptText="TIME" />
+                                          <TextField fx:id="dateField" editable="false" prefHeight="38.0" prefWidth="280.0" promptText="DATE" />
+                                          <TextField fx:id="timeField" editable="false" layoutX="10.0" layoutY="10.0" prefHeight="38.0" prefWidth="280.0" promptText="TIME" />
                                        </children>
                                     </VBox>
                                  </children>

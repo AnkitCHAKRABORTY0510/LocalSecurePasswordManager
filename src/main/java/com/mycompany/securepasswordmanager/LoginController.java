@@ -54,50 +54,34 @@ public class LoginController {
     }
     
     
-    public void fetchAndSetUserDetails(String userID) throws SQLException {
-        UserSession session = UserSession.getInstance();
-
-        String query = "SELECT first_name, last_name, email_id, phone_number, user_creation_time, user_id FROM userinformation WHERE user_id = ?";
-
-        try (Connection connection = DriverManager.getConnection(session.getDatabasePath(userID));
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-
-            preparedStatement.setString(1, userID);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-                session.setFirstName(resultSet.getString("first_name"));
-                session.setLastName(resultSet.getString("last_name"));
-                session.setEmailId(resultSet.getString("email_id"));
-                session.setPhoneNumber(resultSet.getString("phone_number"));
-
-                // Assuming user_creation_time is stored as 'YYYY-MM-DDTHH:MM:SS'
-                String dateTime = resultSet.getString("user_creation_time");
-                session.setUserCreationDateTime(dateTime);
-
-                session.setUserID(resultSet.getString("user_id"));
-            } else {
-                System.err.println("User details not found in the database for userID: " + userID);
-            }
-
-        }    }
+    
 
     // Example usage in the login button action method
-    public void LoginButtonOn(ActionEvent e) throws SQLException, NoSuchAlgorithmException {
+    public void LoginButtonOn(ActionEvent e) throws SQLException, NoSuchAlgorithmException, Exception {
         if (!UserNameTextField.getText().isBlank() && !PasswordTextField.getText().isBlank()) {
             if (validateLogin(UserNameTextField.getText(), PasswordTextField.getText())) {
                 try {
                     UserSession session = UserSession.getInstance();
+                    session.setUserpassword(PasswordTextField.getText());
                     session.setUsername(UserNameTextField.getText());
                     session.setUserID(Database.getUserID(UserNameTextField.getText()));
-                    session.setUserpassword(PasswordTextField.getText());
-
+                    
+                    session.initializeDatabase(session.getUserID());
+                    
+                    //one time encryption
+                    String encryptedUserID = EncryptionUtils.encrypt(session.getUserID(), session.getSecretKey(), session.getIv());
+                    UserKeysDatabase.getKeysForUser(encryptedUserID);
+                    System.out.println(UserKeysDatabase.DatasecretKey);
+                    System.out.println(UserKeysDatabase.Dataiv);
+                    session.setuserSecretKey(UserKeysDatabase.DatasecretKey);
+                    session.setuserIv(UserKeysDatabase.Dataiv);
+                    session.fetchAndSetUserDetails();//encrypt remaining details
+                    
                     // Fetch and set user details
-                    fetchAndSetUserDetails(session.getUserID());
+                    //fetchAndSetUserDetails(session.getUserID());
 
                     // Optionally initialize the user's database
-                    session.initializeDatabase();
+                    //session.initializeDatabase(UserID);
 
                     switchToMainScreen();
                 } catch (IOException ex) {
@@ -112,7 +96,8 @@ public class LoginController {
     }
     
     
-    private boolean validateLogin(String username, String password) throws SQLException, NoSuchAlgorithmException {
+    private boolean validateLogin(String username, String password) throws SQLException, NoSuchAlgorithmException, Exception {
+        
         return Database.validateLogin(username, password);
     }
 

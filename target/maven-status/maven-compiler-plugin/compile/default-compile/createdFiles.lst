@@ -1,11 +1,14 @@
+com/mycompany/securepasswordmanager/UserKeysDatabase.class
 com/mycompany/securepasswordmanager/AddNewPasswordDialogController.class
 com/mycompany/securepasswordmanager/UserSession.class
 com/mycompany/securepasswordmanager/UserDetailsController.class
 com/mycompany/securepasswordmanager/App.class
 module-info.class
+com/mycompany/securepasswordmanager/SecurityUtils.class
 com/mycompany/securepasswordmanager/NewUserController.class
 com/mycompany/securepasswordmanager/PasswordData.class
 com/mycompany/securepasswordmanager/PasswordGenerator.class
+com/mycompany/securepasswordmanager/EncryptionUtils.class
 com/mycompany/securepasswordmanager/ViewPasswordController.class
 com/mycompany/securepasswordmanager/DatabaseEncryptor.class
 com/mycompany/securepasswordmanager/Database.class
