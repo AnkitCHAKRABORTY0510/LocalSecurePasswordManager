@@ -144,6 +144,8 @@ public class UserSession {
     public String getUserCreationTime() {
         return userCreationTime;
     }
+    
+    
 
     public void setUserCreationTime(String userCreationTime) {
         this.userCreationTime = userCreationTime;
@@ -204,6 +206,7 @@ public class UserSession {
             String createPasswordTableSQL = "CREATE TABLE IF NOT EXISTS passwords (" +
                                             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                                             "url TEXT NOT NULL," +
+                                            "Account TEXT," +
                                             "salt TEXT NOT NULL," +
                                             "encrypted_password TEXT NOT NULL," +
                                             "description TEXT," +

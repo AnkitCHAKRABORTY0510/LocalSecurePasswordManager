@@ -7,7 +7,10 @@ import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
@@ -24,6 +27,9 @@ public class MainController {
     @FXML
     private Label UserName;
     
+    @FXML 
+    private Button addnewpassword;
+    
     private String username;
 
     @FXML
@@ -33,6 +39,15 @@ public class MainController {
 
         UserName.setText("WELCOME ! " + username);
     }
+    
+    @FXML
+    private void handleAddNewPasswordClick() {
+    try {
+        openAddPasswordDialog();
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
 
  
 @FXML
@@ -100,4 +115,39 @@ public void handleLogout() {
 
         alert.show();
     }
+    
+   private void openAddPasswordDialog() throws Exception {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("AddNewPasswordDialog.fxml"));
+            DialogPane dialogPane = loader.load();
+
+            AddNewPasswordDialogController controller = loader.getController();
+            dialogPane.setStyle("-fx-font-family: 'Arial'; -fx-font-size: 14px;");
+
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Add New Password");
+            
+            
+            
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(addnewpassword.getScene().getWindow());
+
+            dialogStage.setWidth(500);
+            dialogStage.setHeight(500);
+            dialogStage.setResizable(false);
+
+            Scene scene = new Scene(dialogPane);
+            dialogStage.setScene(scene);
+
+            controller.setDialog(new Dialog<>());
+
+            dialogStage.showAndWait();
+
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+   
+   
 }

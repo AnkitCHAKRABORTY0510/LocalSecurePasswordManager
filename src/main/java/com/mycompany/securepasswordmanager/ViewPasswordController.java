@@ -14,6 +14,8 @@ import javafx.util.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -59,12 +61,22 @@ public class ViewPasswordController {
     private Button addPasswordButton;
 
     @FXML
-    public void initialize() {
-        addPasswordButton.setOnAction(event -> openAddPasswordDialog());
-        loadPasswordsFromDatabase();
+    public void initialize() throws Exception {
+        try {
+            addPasswordButton.setOnAction(event -> {
+                try {
+                    openAddPasswordDialog();
+                } catch (Exception ex) {
+                    Logger.getLogger(ViewPasswordController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            });
+            loadPasswordsFromDatabase();
+        } catch (Exception ex) {
+            Logger.getLogger(ViewPasswordController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
-    private void openAddPasswordDialog() {
+    private void openAddPasswordDialog() throws Exception {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("AddNewPasswordDialog.fxml"));
             DialogPane dialogPane = loader.load();
@@ -97,11 +109,11 @@ public class ViewPasswordController {
         }
     }
 
-    private void loadPasswordsFromDatabase() {
+    protected void loadPasswordsFromDatabase() throws Exception {
     UserSession userSession = UserSession.getInstance();
     String dbUrl = "jdbc:sqlite:data/users/" + userSession.getUserID() + ".db";
-    String selectSQL = "SELECT id, url, encrypted_password, salt, description FROM passwords";
-
+    String selectSQL = "SELECT id, url, Account, encrypted_password, salt, description FROM passwords";
+    UserSession session = UserSession.getInstance();
     try (Connection connection = DriverManager.getConnection(dbUrl);
          Statement statement = connection.createStatement();
          ResultSet resultSet = statement.executeQuery(selectSQL)) {
@@ -110,12 +122,27 @@ public class ViewPasswordController {
 
         while (resultSet.next()) {
             int id = resultSet.getInt("id");
+          
             String url = resultSet.getString("url");
+            url=EncryptionUtils.decrypt(url,session.getuserSecretKey(),session.getuserIv());
+            
+            String Account = resultSet.getString("Account");
+            Account=EncryptionUtils.decrypt(Account,session.getuserSecretKey(),session.getuserIv());
+            
             String encryptedPassword = resultSet.getString("encrypted_password");
+            encryptedPassword=EncryptionUtils.decrypt(encryptedPassword,session.getuserSecretKey(),session.getuserIv());
+            
             String salt = resultSet.getString("salt");
+            salt=EncryptionUtils.decrypt(salt,session.getuserSecretKey(),session.getuserIv());
+            
+            
             String description = resultSet.getString("description");
-
-            passwordList.add(new PasswordData(id, url, encryptedPassword, salt, description));
+            description=EncryptionUtils.decrypt(description,session.getuserSecretKey(),session.getuserIv());
+            
+            String decryptPassword=decryptPassword(encryptedPassword,salt);//to get mine original password
+            passwordList.add(new PasswordData(id, url ,Account, encryptedPassword, decryptPassword, salt, description));
+            
+            
         }
 
         displayPasswords(passwordList);
@@ -135,12 +162,38 @@ public class ViewPasswordController {
     
     private String decryptPassword(PasswordData passwordData) {
         try {
+            System.out.println("View Password \n "+ passwordData.getUrl());
             byte[] decodedSalt = Base64.getDecoder().decode(passwordData.getSalt());
             byte[] decodedKey = generateKey(decodedSalt);
+            System.out.println("decoded salt "+ decodedKey );
             SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
 
             byte[] encryptedBytes = Base64.getDecoder().decode(passwordData.getEncryptedPassword());
+            System.out.println("encryptedPassword"+ encryptedBytes);
+            
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.DECRYPT_MODE, originalKey);
+            byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
 
+            return new String(decryptedBytes);
+        } catch (InvalidKeyException | NoSuchAlgorithmException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException e) {
+            e.printStackTrace();
+            showAlert("Error", "Failed to decrypt password.");
+            return "";
+        }
+    }
+    
+    private String decryptPassword(String EncryptedPassword,String salt) {
+        try {
+            
+            byte[] decodedSalt = Base64.getDecoder().decode(salt);
+            byte[] decodedKey = generateKey(decodedSalt);
+           
+            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+
+            byte[] encryptedBytes = Base64.getDecoder().decode(EncryptedPassword);
+            
+            
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.DECRYPT_MODE, originalKey);
             byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
@@ -171,157 +224,158 @@ public class ViewPasswordController {
     
     
     private void displayPasswords(List<PasswordData> passwordList) {
-    passwordsContainer.getChildren().clear();
+        passwordsContainer.getChildren().clear();
 
-    for (PasswordData passwordData : passwordList) {
-        String decryptedPassword = decryptPassword(passwordData);
+        for (PasswordData passwordData : passwordList) {
+            String decryptedPassword = decryptPassword(passwordData);
 
-        HBox hBox = new HBox();
-        hBox.setPrefHeight(413.0);
-        hBox.setPrefWidth(725.0);
-        hBox.setMaxHeight(Double.MAX_VALUE);
-        hBox.setMaxWidth(Double.MAX_VALUE);
-        hBox.setSpacing(10);
+            HBox hBox = new HBox();
+            hBox.setPrefHeight(35.0);
+            hBox.setPrefWidth(969.0);
+            hBox.setSpacing(10);
 
-        Label urlLabel = new Label(passwordData.getUrl());
-        urlLabel.setPrefHeight(35.0);
-        urlLabel.setPrefWidth(399.0);
-        urlLabel.setTextAlignment(TextAlignment.CENTER);
-        urlLabel.setAlignment(Pos.CENTER);
-        urlLabel.setFont(new Font("Avenir Black", 14.0));
-        SepiaTone sepiaTone = new SepiaTone();
-        sepiaTone.setLevel(0.42);
-        urlLabel.setEffect(sepiaTone);
-        HBox.setHgrow(urlLabel, Priority.ALWAYS);
+            Label urlLabel = new Label(passwordData.getUrl());
+            urlLabel.setPrefHeight(35.0);
+            urlLabel.setPrefWidth(270.0);
+            urlLabel.setTextAlignment(TextAlignment.CENTER);
+            urlLabel.setAlignment(Pos.CENTER);
+            urlLabel.setFont(new Font("Avenir Black", 14.0));
+            urlLabel.setStyle("-fx-border-color: blue; -fx-border-radius: 5; -fx-background-color: #E3F4FB;");
+            HBox.setHgrow(urlLabel, Priority.ALWAYS);
 
-        TextField passwordTextField = new TextField();
-        passwordTextField.setText(decryptedPassword);
-        passwordTextField.setPrefHeight(35.0);
-        passwordTextField.setPrefWidth(345.0);
-        passwordTextField.setFont(new Font("Avenir Black", 14.0));
-        passwordTextField.setEditable(false);
-        passwordTextField.setVisible(false);
+            Label accountLabel = new Label(passwordData.getAccount());
+            accountLabel.setPrefHeight(35.0);
+            accountLabel.setPrefWidth(235.0);
+            accountLabel.setTextAlignment(TextAlignment.CENTER);
+            accountLabel.setAlignment(Pos.CENTER);
+            accountLabel.setFont(new Font("Avenir Black", 14.0));
+            accountLabel.setStyle("-fx-border-color: blue; -fx-border-radius: 5; -fx-background-color: #E3F4FB;");
+            SepiaTone sepiaTone = new SepiaTone();
+            sepiaTone.setLevel(0.42);
+            accountLabel.setEffect(sepiaTone);
+            HBox.setHgrow(accountLabel, Priority.ALWAYS);
 
-        PasswordField passwordField = new PasswordField();
-        passwordField.setText(decryptedPassword);
-        passwordField.setPrefHeight(35.0);
-        passwordField.setPrefWidth(349.0);
-        passwordField.setEditable(false);
+            TextField passwordTextField = new TextField();
+            passwordTextField.setText(decryptedPassword);
+            passwordTextField.setPrefHeight(35.0);
+            passwordTextField.setPrefWidth(280.0);
+            passwordTextField.setFont(new Font("Avenir Black", 14.0));
+            passwordTextField.setEditable(false);
+            passwordTextField.setVisible(false);
 
-        passwordTextField.managedProperty().bind(passwordTextField.visibleProperty());
-        passwordField.managedProperty().bind(passwordField.visibleProperty());
-        passwordTextField.textProperty().bindBidirectional(passwordField.textProperty());
+            PasswordField passwordField = new PasswordField();
+            passwordField.setText(decryptedPassword);
+            passwordField.setPrefHeight(35.0);
+            passwordField.setPrefWidth(280.0);
+            passwordField.setEditable(false);
 
-        AnchorPane passwordFieldContainer = new AnchorPane();
-        passwordFieldContainer.setPrefHeight(465.0);
-        passwordFieldContainer.setPrefWidth(381.0);
-        passwordFieldContainer.setMaxHeight(Double.MAX_VALUE);
-        passwordFieldContainer.setMaxWidth(Double.MAX_VALUE);
+            passwordTextField.managedProperty().bind(passwordTextField.visibleProperty());
+            passwordField.managedProperty().bind(passwordField.visibleProperty());
+            passwordTextField.textProperty().bindBidirectional(passwordField.textProperty());
 
-        passwordFieldContainer.getChildren().addAll(passwordTextField, passwordField);
-        AnchorPane.setRightAnchor(passwordField, 5.0);
+            AnchorPane passwordFieldContainer = new AnchorPane();
+            passwordFieldContainer.setPrefHeight(35.0);
+            passwordFieldContainer.setPrefWidth(280.0);
+            passwordFieldContainer.getChildren().addAll(passwordTextField, passwordField);
+            AnchorPane.setRightAnchor(passwordField, 0.0);
 
-        ImageView toggleVisibility = new ImageView();
-        toggleVisibility.setFitHeight(35.0);
-        toggleVisibility.setFitWidth(38.0);
-        loadImage(toggleVisibility, "Images/passwordshow.png");
-        toggleVisibility.setCursor(Cursor.HAND);
+            ImageView toggleVisibility = new ImageView();
+            toggleVisibility.setFitHeight(35.0);
+            toggleVisibility.setFitWidth(35.0);
+            loadImage(toggleVisibility, "Images/passwordshow.png");
+            toggleVisibility.setCursor(Cursor.HAND);
 
-        toggleVisibility.setOnMouseClicked(event -> {
-            if (passwordTextField.isVisible()) {
-                passwordTextField.setVisible(false);
-                passwordField.setVisible(true);
-                loadImage(toggleVisibility, "Images/passwordshow.png");
-            } else {
-                passwordTextField.setVisible(true);
-                passwordField.setVisible(false);
-                loadImage(toggleVisibility, "Images/passwordhide.png");
-            }
-        });
+            toggleVisibility.setOnMouseClicked(event -> {
+                if (passwordTextField.isVisible()) {
+                    passwordTextField.setVisible(false);
+                    passwordField.setVisible(true);
+                    loadImage(toggleVisibility, "Images/passwordshow.png");
+                } else {
+                    passwordTextField.setVisible(true);
+                    passwordField.setVisible(false);
+                    loadImage(toggleVisibility, "Images/passwordhide.png");
+                }
+            });
 
-        ImageView infoImage = new ImageView();
-        infoImage.setFitHeight(36.0);
-        infoImage.setFitWidth(37.0);
-        loadImage(infoImage, "Images/info.png");
-        infoImage.setCursor(Cursor.OPEN_HAND);
+            AnchorPane visibilityContainer = new AnchorPane();
+            visibilityContainer.setPrefHeight(35.0);
+            visibilityContainer.setPrefWidth(35.0);
+            visibilityContainer.getChildren().add(toggleVisibility);
+            AnchorPane.setBottomAnchor(toggleVisibility, 5.0);
+            AnchorPane.setLeftAnchor(toggleVisibility, 5.0);
+            AnchorPane.setRightAnchor(toggleVisibility, 5.0);
+            AnchorPane.setTopAnchor(toggleVisibility, 5.0);
 
-        infoImage.setOnMouseClicked(event -> {
-            showInfoDialog(passwordData);
-        });
+            ImageView infoImage = new ImageView();
+            infoImage.setFitHeight(35.0);
+            infoImage.setFitWidth(35.0);
+            loadImage(infoImage, "Images/info.png");
+            infoImage.setCursor(Cursor.OPEN_HAND);
 
-        ImageView editImage = new ImageView();
-        editImage.setFitHeight(35.0);
-        editImage.setFitWidth(36.0);
-        loadImage(editImage, "Images/edit.png");
-        editImage.setCursor(Cursor.HAND);
-        
-        // Handle the edit functionality
-        editImage.setOnMouseClicked(event -> {
-            openEditDialog(passwordData);
-        });
-        
-        // Copy to clipboard ImageView
-        ImageView copyImage = new ImageView();
-        copyImage.setFitHeight(35.0);
-        copyImage.setFitWidth(36.0);
-        loadImage(copyImage, "Images/copy.png");
-        copyImage.setCursor(Cursor.HAND);
+            infoImage.setOnMouseClicked(event -> {
+                showInfoDialog(passwordData);
+            });
 
-        // Set the action for copying to clipboard
-        copyImage.setOnMouseClicked(event -> {
-            Clipboard clipboard = Clipboard.getSystemClipboard();
-            ClipboardContent content = new ClipboardContent();
-            content.putString(decryptedPassword);
-            clipboard.setContent(content);
-            showConfirmation("COPY TO CLIPBOARD","Password:   " +decryptedPassword + " ", "Password copied to clipboard!");
-        });
-        
-        AnchorPane visibilityContainer = new AnchorPane();
-        visibilityContainer.setPrefHeight(80.0);
-        visibilityContainer.setPrefWidth(59.0);
-        visibilityContainer.setMaxWidth(Double.MAX_VALUE);
-        visibilityContainer.getChildren().add(toggleVisibility);
+            AnchorPane infoContainer = new AnchorPane();
+            infoContainer.setPrefHeight(35.0);
+            infoContainer.setPrefWidth(35.0);
+            infoContainer.getChildren().add(infoImage);
+            AnchorPane.setBottomAnchor(infoImage, 5.0);
+            AnchorPane.setLeftAnchor(infoImage, 5.0);
+            AnchorPane.setRightAnchor(infoImage, 5.0);
+            AnchorPane.setTopAnchor(infoImage, 5.0);
 
-        AnchorPane.setBottomAnchor(toggleVisibility, 5.0);
-        AnchorPane.setLeftAnchor(toggleVisibility, 5.0);
-        AnchorPane.setRightAnchor(toggleVisibility, 5.0);
-        AnchorPane.setTopAnchor(toggleVisibility, 5.0);
+            ImageView editImage = new ImageView();
+            editImage.setFitHeight(35.0);
+            editImage.setFitWidth(35.0);
+            loadImage(editImage, "Images/edit.png");
+            editImage.setCursor(Cursor.HAND);
 
-        AnchorPane infoContainer = new AnchorPane();
-        infoContainer.setPrefHeight(465.0);
-        infoContainer.setPrefWidth(100.0);
-        infoContainer.getChildren().add(infoImage);
+            editImage.setOnMouseClicked(event -> {
+                try {
+                    openEditDialog(passwordData);
+                } catch (Exception ex) {
+                    Logger.getLogger(ViewPasswordController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            });
 
-        AnchorPane.setBottomAnchor(infoImage, 5.0);
-        AnchorPane.setLeftAnchor(infoImage, 5.0);
-        AnchorPane.setRightAnchor(infoImage, 5.0);
-        AnchorPane.setTopAnchor(infoImage, 5.0);
+            AnchorPane editContainer = new AnchorPane();
+            editContainer.setPrefHeight(35.0);
+            editContainer.setPrefWidth(35.0);
+            editContainer.getChildren().add(editImage);
+            AnchorPane.setBottomAnchor(editImage, 5.0);
+            AnchorPane.setLeftAnchor(editImage, 5.0);
+            AnchorPane.setRightAnchor(editImage, 5.0);
+            AnchorPane.setTopAnchor(editImage, 5.0);
 
-        AnchorPane editContainer = new AnchorPane();
-        editContainer.setPrefHeight(465.0);
-        editContainer.setPrefWidth(188.0);
-        editContainer.getChildren().add(editImage);
+            ImageView copyImage = new ImageView();
+            copyImage.setFitHeight(35.0);
+            copyImage.setFitWidth(35.0);
+            loadImage(copyImage, "Images/copy.png");
+            copyImage.setCursor(Cursor.HAND);
 
-        AnchorPane.setBottomAnchor(editImage, 5.0);
-        AnchorPane.setLeftAnchor(editImage, 5.0);
-        AnchorPane.setRightAnchor(editImage, 5.0);
-        AnchorPane.setTopAnchor(editImage, 5.0);
-        
-        AnchorPane copyContainer = new AnchorPane();
-        copyContainer.setPrefHeight(465.0);
-        copyContainer.setPrefWidth(100.0);
-        copyContainer.getChildren().add(copyImage);
+            copyImage.setOnMouseClicked(event -> {
+                Clipboard clipboard = Clipboard.getSystemClipboard();
+                ClipboardContent content = new ClipboardContent();
+                content.putString(decryptedPassword);
+                clipboard.setContent(content);
+                showConfirmation("COPY TO CLIPBOARD", "Password: " + decryptedPassword, "Password copied to clipboard!");
+            });
 
-        AnchorPane.setBottomAnchor(copyImage, 5.0);
-        AnchorPane.setLeftAnchor(copyImage, 5.0);
-        AnchorPane.setRightAnchor(copyImage, 5.0);
-        AnchorPane.setTopAnchor(copyImage, 5.0);
-        
-       
-        hBox.getChildren().addAll(urlLabel, passwordFieldContainer, visibilityContainer, infoContainer, editContainer, copyContainer);
-        passwordsContainer.getChildren().add(hBox);
+            AnchorPane copyContainer = new AnchorPane();
+            copyContainer.setPrefHeight(35.0);
+            copyContainer.setPrefWidth(35.0);
+            copyContainer.getChildren().add(copyImage);
+            AnchorPane.setBottomAnchor(copyImage, 5.0);
+            AnchorPane.setLeftAnchor(copyImage, 5.0);
+            AnchorPane.setRightAnchor(copyImage, 5.0);
+            AnchorPane.setTopAnchor(copyImage, 5.0);
+
+            hBox.getChildren().addAll(urlLabel, accountLabel, passwordFieldContainer, visibilityContainer, infoContainer, editContainer, copyContainer);
+            passwordsContainer.getChildren().add(hBox);
+        }
     }
-}
+
     
     private void showInfoDialog(PasswordData passwordData) {
 
@@ -402,7 +456,7 @@ public class ViewPasswordController {
         alert.showAndWait();
     }
    
-   private void openEditDialog(PasswordData passwordData) {
+   private void openEditDialog(PasswordData passwordData) throws Exception {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("EditPasswordDialog.fxml"));
             DialogPane dialogPane = loader.load();

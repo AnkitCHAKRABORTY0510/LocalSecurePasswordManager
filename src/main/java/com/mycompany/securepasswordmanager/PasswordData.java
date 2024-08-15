@@ -12,36 +12,52 @@ public class PasswordData {
     private String encryptedPassword;
     private String salt;
     private String url;
+    private String account;
     private String description;  
-    private int id;  
+    private int id;
+    private String decryptedPassword;
+    
+    protected  void setdecryptedPassword(String decryptedPassword)
+    {
+        this.decryptedPassword=decryptedPassword;
+    }
+    
+    protected String getdecryptedPassword()
+    {
+        return decryptedPassword;
+    }
 
     // Existing getters and setters
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
-
+    
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
-    public PasswordData(int id, String url, String encryptedPassword, String salt, String description) {
+    public PasswordData(int id, String url,String account, String encryptedPassword,String decryptPassword, String salt, String description) {
         this.encryptedPassword = encryptedPassword;
         this.salt = salt;
         this.url= url;
         this.id=id;
+        this.decryptedPassword=decryptPassword;
+        this.account=account;
         this.description=description;
     }
     
     public PasswordData(String encryptedPassword, String salt) {
+        System.out.println("encryptedPassword "+encryptedPassword);
+        System.out.println("salt " + salt);
         this.encryptedPassword = encryptedPassword;
         this.salt = salt;
     }
 
     public String getEncryptedPassword() {
-        System.out.println(encryptedPassword);//check///this data is taken out so that i can decrypt my generated password
+        System.out.println("encryptedPassword "+encryptedPassword);// my generated password
         return encryptedPassword;
     }
 
     public String getSalt() {
-        System.out.println(salt);//check///this data is taken out so that i can decrypt my generated password
+        System.out.println("salt "+salt);//check///this data is taken out so that i can decrypt my generated password
         return salt;
     }
     
@@ -49,5 +65,12 @@ public class PasswordData {
         System.out.println(url);
         return url;
         
+    }
+    public String getAccount() {
+        return account;
+    }
+    
+    public void setAccount(String Account) {
+        this.account = Account;
     }
 }

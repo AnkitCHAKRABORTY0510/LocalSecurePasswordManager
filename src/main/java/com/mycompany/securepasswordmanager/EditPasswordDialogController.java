@@ -25,6 +25,8 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javafx.scene.layout.AnchorPane;
 
@@ -37,6 +39,9 @@ public class EditPasswordDialogController {
     private TextField urlField;
 
     @FXML
+    private TextField AccountField;
+    
+    @FXML
     private TextField passwordField;
     
     @FXML
@@ -45,6 +50,8 @@ public class EditPasswordDialogController {
     @FXML
     private TextField CurrentPasswordField;
 
+    @FXML
+    private TextField CurrentAccountField;
 
     @FXML
     private TextArea descriptionArea;
@@ -73,7 +80,11 @@ public class EditPasswordDialogController {
     public void initialize() {
         if (ADD != null) {
             ADD.setOnAction(event -> {
-                handleOK();
+                try {
+                    handleOK();
+                } catch (Exception ex) {
+                    Logger.getLogger(EditPasswordDialogController.class.getName()).log(Level.SEVERE, null, ex);
+                }
             });
         }
 
@@ -94,7 +105,7 @@ public class EditPasswordDialogController {
         });
     }
 
-    private void handleOK() {
+    private void handleOK() throws Exception {
         if (validateInput()) {
             preprocessingPassword();
             closeDialog();
@@ -108,7 +119,7 @@ public class EditPasswordDialogController {
     private boolean validateInput() {
         String url = urlField.getText();
         String password = passwordField.getText();
-        String description = descriptionArea.getText();
+        
 
         if (url == null || url.trim().isEmpty()) {
             urlField.setText(CurrentUrlField.getText());
@@ -128,10 +139,13 @@ public class EditPasswordDialogController {
         stage.close();
     }
     
-    public void setPasswordData(PasswordData passwordData) {
+    protected void setPasswordData(PasswordData passwordData) {
         this.passwordData = passwordData;
         CurrentUrlField.setText(passwordData.getUrl());
-        CurrentPasswordField.setText(passwordData.getEncryptedPassword());
+        CurrentAccountField.setText(passwordData.getAccount());
+        
+        
+        CurrentPasswordField.setText(passwordData.getdecryptedPassword());
         descriptionArea.setText(passwordData.getDescription());
     }
     
@@ -139,11 +153,13 @@ public class EditPasswordDialogController {
     //decrypt the generate password based on the data encripted data provided
     private String decryptPassword(PasswordData passwordData) {
         try {
+            System.out.println("\n\nEditPassword \n "+ passwordData.getUrl());
             byte[] decodedKey = Base64.getDecoder().decode(passwordData.getSalt());
+            System.out.println("decoded key  "+ decodedKey);
             SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-
+            
             byte[] encryptedBytes = Base64.getDecoder().decode(passwordData.getEncryptedPassword());
-
+            System.out.println("encrypted key" + encryptedBytes);
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.DECRYPT_MODE, originalKey);
             byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
@@ -198,35 +214,71 @@ public class EditPasswordDialogController {
         }
     }
 
-    private void preprocessingPassword() {
-        String url = urlField.getText();
-        String originalPassword = passwordField.getText();
-        String description = descriptionArea.getText();
+    private void preprocessingPassword() throws Exception {
+        String url, originalPassword, account, description;
+
+        // Check if urlField is not null, otherwise use CurrentUrlField
+        if (urlField.getText() != null && !urlField.getText().isEmpty()) {
+            url = urlField.getText();
+        } else {
+            url = CurrentUrlField.getText();
+        }
+
+        // Check if passwordField is not null, otherwise you might want to handle it or assign a default
+        if (passwordField.getText() != null && !passwordField.getText().isEmpty()) {
+            originalPassword = passwordField.getText();
+        } else {
+            originalPassword = CurrentPasswordField.getText(); // or handle accordingly
+        }
+
+        // Check if AccountField is not null, otherwise handle it
+        if (AccountField.getText() != null && !AccountField.getText().isEmpty()) {
+            account = AccountField.getText();
+        } else {
+            account = CurrentAccountField.getText() ; // Assign a default or handle accordingly
+        }
+
+        // Check if descriptionArea is not null, otherwise handle it
+        if (descriptionArea.getText() != null && !descriptionArea.getText().isEmpty()) {
+            description = descriptionArea.getText();
+        } else {
+            description = ""; // Assign a default or handle accordingly
+        }
         byte[] salt = generateSalt();
         String encryptedPasswordWithSalt = encryptPassword(originalPassword, salt);
         if (encryptedPasswordWithSalt != null) {
-            savePassword(url, encryptedPasswordWithSalt, description);
+            savePassword(url, account, encryptedPasswordWithSalt, description);
         }
     }
 
-    private void savePassword(String newUrl, String encryptedPasswordWithSalt, String newDescription) {
+    private void savePassword(String Url, String account, String encryptedPasswordWithSalt, String description) throws Exception {
         
         String[] parts = encryptedPasswordWithSalt.split(":");
         String salt = parts[0];
-        String newPassword = parts[1];
+        String encryptedPassword = parts[1];
         
-        UserSession userSession = UserSession.getInstance();
-        String dbUrl = "jdbc:sqlite:data/users/" + userSession.getUserID() + ".db";
-        String updateSQL = "UPDATE passwords SET url = ?, encrypted_password = ?, salt = ?, description = ? WHERE id = ?";
+        
+        
+        UserSession session = UserSession.getInstance();
+        Url=EncryptionUtils.encrypt(Url,session.getuserSecretKey(),session.getuserIv());
+        account=EncryptionUtils.encrypt(account,session.getuserSecretKey(),session.getuserIv());
+        description=EncryptionUtils.encrypt(description,session.getuserSecretKey(),session.getuserIv());
+        encryptedPassword=EncryptionUtils.encrypt(encryptedPassword,session.getuserSecretKey(),session.getuserIv());
+        salt=EncryptionUtils.encrypt(salt,session.getuserSecretKey(),session.getuserIv());
+        
+        
+        String dbUrl = "jdbc:sqlite:data/users/" + session.getUserID() + ".db";
+        String updateSQL = "UPDATE passwords SET url = ?, Account =?, encrypted_password = ?, salt = ?, description = ? WHERE id = ?";
         
         try (Connection connection = DriverManager.getConnection(dbUrl);
              PreparedStatement statement = connection.prepareStatement(updateSQL)) {
 
-            statement.setString(1, newUrl);
-            statement.setString(2, newPassword);
-            statement.setString(3, salt);
-            statement.setString(4, newDescription);
-            statement.setInt(5, passwordData.getId());
+            statement.setString(1, Url);
+            statement.setString(2, account);
+            statement.setString(3, encryptedPassword);
+            statement.setString(4, salt);
+            statement.setString(5,description);
+            statement.setInt(6, passwordData.getId());
 
             statement.executeUpdate();
 

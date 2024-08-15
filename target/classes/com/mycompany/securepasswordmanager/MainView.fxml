@@ -14,13 +14,14 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane id="BorderPane" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.securepasswordmanager.MainController">
+<BorderPane id="BorderPane" prefHeight="800.0" prefWidth="1200.0" style="-fx-background-color: #E0E9EB;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.securepasswordmanager.MainController">
    <left>
       <VBox alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="490.0" prefWidth="222.0" style="-fx-background-color: #E0E5EB;" BorderPane.alignment="CENTER">
          <children>
@@ -45,7 +46,7 @@
             </Label>
             <TilePane alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="313.0" prefWidth="226.0" VBox.vgrow="ALWAYS">
                <children>
-                  <Button alignment="TOP_LEFT" contentDisplay="CENTER" mnemonicParsing="false" onAction="#loadViewPassword" prefHeight="29.0" prefWidth="212.0" style="-fx-background-color: #E3F2FD;" text="VIEW ALL PASSWORDS" textFill="#211573" wrapText="true">
+                  <Button fx:id="add" alignment="TOP_LEFT" contentDisplay="CENTER" mnemonicParsing="false" onAction="#loadViewPassword" prefHeight="29.0" prefWidth="212.0" style="-fx-background-color: #E3F2FD;" text="VIEW ALL PASSWORDS" textFill="#211573" wrapText="true">
                      <font>
                         <Font name="Arial Black" size="13.0" />
                      </font>
@@ -53,7 +54,7 @@
                         <DropShadow />
                      </effect>
                   </Button>
-                  <Button alignment="TOP_LEFT" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefHeight="29.0" prefWidth="213.0" style="-fx-background-color: #E3F2FD;" text="ADD NEW PASSWORDS" textFill="#0e8013" wrapText="true">
+                  <Button fx:id="addnewpassword" alignment="TOP_LEFT" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#handleAddNewPasswordClick" prefHeight="29.0" prefWidth="213.0" style="-fx-background-color: #E3F2FD;" text="ADD NEW PASSWORDS" textFill="#0e8013" wrapText="true">
                      <font>
                         <Font name="Arial Black" size="13.0" />
                      </font>
@@ -137,6 +138,9 @@
       </MenuBar>
    </top>
    <center>
-      <VBox fx:id="contentPane" alignment="CENTER" prefHeight="550.0" prefWidth="564.0" style="-fx-background-color: #E0E9EB;" BorderPane.alignment="CENTER" />
+      <VBox fx:id="contentPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1024.0" style="-fx-background-color: #E0E9EB;" BorderPane.alignment="TOP_LEFT" />
    </center>
+   <right>
+      <Pane prefHeight="20.0" prefWidth="20.0" style="-fx-background-color: #E0E9EB;" BorderPane.alignment="TOP_LEFT" />
+   </right>
 </BorderPane>

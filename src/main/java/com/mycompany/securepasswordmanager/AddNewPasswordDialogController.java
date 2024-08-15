@@ -25,6 +25,8 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.control.Label;
@@ -58,16 +60,10 @@ public class AddNewPasswordDialogController {
     private Dialog<Void> dialog;
 
     private int passwordLength = 15; // Default password length
+   
+    
     @FXML
-    private AnchorPane OK;
-    @FXML
-    private Label currentPassword;
-    @FXML
-    private Label currentPassword1;
-    @FXML
-    private TextField passwordField1;
-    @FXML
-    private TextField urlField1;
+    private TextField AccountField;
 
     public void setDialog(Dialog<Void> dialog) {
         this.dialog = dialog;
@@ -76,7 +72,11 @@ public class AddNewPasswordDialogController {
     public void initialize() {
         if (ADD != null) {
             ADD.setOnAction(event -> {
-                handleOK();
+                try {
+                    handleOK();
+                } catch (Exception ex) {
+                    Logger.getLogger(AddNewPasswordDialogController.class.getName()).log(Level.SEVERE, null, ex);
+                }
             });
         }
 
@@ -97,7 +97,7 @@ public class AddNewPasswordDialogController {
         });
     }
 
-    private void handleOK() {
+    private void handleOK() throws Exception {
         if (validateInput()) {
             preprocessingPassword();
             closeDialog();
@@ -111,7 +111,7 @@ public class AddNewPasswordDialogController {
     private boolean validateInput() {
         String url = urlField.getText();
         String password = passwordField.getText();
-        String description = descriptionArea.getText();
+        
 
         if (url == null || url.trim().isEmpty()) {
             showAlert("Validation Error", "URL cannot be empty.");
@@ -135,11 +135,13 @@ public class AddNewPasswordDialogController {
     //decrypt the generate password based on the data encripted data provided
     private String decryptPassword(PasswordData passwordData) {
         try {
+            System.out.println("\n\nAdd New Password \n "+ passwordData.getUrl());
             byte[] decodedKey = Base64.getDecoder().decode(passwordData.getSalt());
+            System.out.println("decoded key  "+ decodedKey);
             SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-
+            
             byte[] encryptedBytes = Base64.getDecoder().decode(passwordData.getEncryptedPassword());
-
+            System.out.println("encrypted key" + encryptedBytes);
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.DECRYPT_MODE, originalKey);
             byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
@@ -209,34 +211,42 @@ public class AddNewPasswordDialogController {
         }
     }
 
-    private void preprocessingPassword() {
+    private void preprocessingPassword() throws Exception {
         String url = urlField.getText();
         String originalPassword = passwordField.getText();
         String description = descriptionArea.getText();
+        String account = AccountField.getText();
         byte[] salt = generateSalt();
         String encryptedPasswordWithSalt = encryptPassword(originalPassword, salt);
         if (encryptedPasswordWithSalt != null) {
-            storePasswordInDatabase(url, encryptedPasswordWithSalt, description);
+            storePasswordInDatabase(url,account, encryptedPasswordWithSalt, description);
         }
     }
 
-    private void storePasswordInDatabase(String url, String encryptedPasswordWithSalt, String description) {
+    private void storePasswordInDatabase(String url, String account, String encryptedPasswordWithSalt, String description) throws Exception {
         String[] parts = encryptedPasswordWithSalt.split(":");
         String salt = parts[0];
         String encryptedPassword = parts[1];
-
-        UserSession userSession = UserSession.getInstance();
-        String dbUrl = "jdbc:sqlite:Data/Users/" + userSession.getUserID() + ".db";
-        String insertSQL = "INSERT INTO passwords (url, salt, encrypted_password, description, username) VALUES (?, ?, ?, ?, ?)";
+        
+        UserSession session = UserSession.getInstance();
+        url=EncryptionUtils.encrypt(url,session.getuserSecretKey(),session.getuserIv());
+        account=EncryptionUtils.encrypt(account,session.getuserSecretKey(),session.getuserIv());
+        description=EncryptionUtils.encrypt(description,session.getuserSecretKey(),session.getuserIv());
+        encryptedPassword=EncryptionUtils.encrypt(encryptedPassword,session.getuserSecretKey(),session.getuserIv());
+        salt=EncryptionUtils.encrypt(salt,session.getuserSecretKey(),session.getuserIv());
+        
+        String dbUrl = "jdbc:sqlite:Data/Users/" + session.getUserID() + ".db";
+        String insertSQL = "INSERT INTO passwords (url, Account, salt, encrypted_password, description, username) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = DriverManager.getConnection(dbUrl);
              PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
 
             preparedStatement.setString(1, url);
-            preparedStatement.setString(2, salt);
-            preparedStatement.setString(3, encryptedPassword);
-            preparedStatement.setString(4, description);
-            preparedStatement.setString(5, userSession.getUsername());
+            preparedStatement.setString(2, account);
+            preparedStatement.setString(3, salt);
+            preparedStatement.setString(4, encryptedPassword);
+            preparedStatement.setString(5, description);
+            preparedStatement.setString(6, session.getUsername());
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
