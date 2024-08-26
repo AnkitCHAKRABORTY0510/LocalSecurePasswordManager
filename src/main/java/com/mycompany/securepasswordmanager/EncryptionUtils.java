@@ -4,32 +4,31 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
-
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Base64;
 
 public class EncryptionUtils {
 
-    protected static final String AES = "AES";
-    protected static final String AES_CIPHER_ALGORITHM = "AES/CBC/PKCS5PADDING";
+    static final String AES = "AES";
+    private static final String AES_CIPHER_ALGORITHM = "AES/CBC/PKCS5PADDING";
 
     // Generate a secret key for AES encryption
-    protected static SecretKey generateSecretKey() throws Exception {
+    public static SecretKey generateSecretKey() throws Exception {
         KeyGenerator keyGen = KeyGenerator.getInstance(AES);
         keyGen.init(256); // 256-bit AES encryption
         return keyGen.generateKey();
     }
 
     // Generate a random IV
-    protected static IvParameterSpec generateIv() {
+    public static IvParameterSpec generateIv() {
         byte[] iv = new byte[16];
         new SecureRandom().nextBytes(iv);
         return new IvParameterSpec(iv);
     }
 
     // Encrypt data using AES encryption
-    protected static String encrypt(String data, SecretKey key, IvParameterSpec iv) throws Exception {
+    public static String encrypt(String data, SecretKey key, IvParameterSpec iv) throws Exception {
         Cipher cipher = Cipher.getInstance(AES_CIPHER_ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, key, iv);
         byte[] encryptedData = cipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
@@ -37,7 +36,7 @@ public class EncryptionUtils {
     }
 
     // Decrypt data using AES decryption
-    protected static String decrypt(String encryptedData, SecretKey key, IvParameterSpec iv) throws Exception {
+    public static String decrypt(String encryptedData, SecretKey key, IvParameterSpec iv) throws Exception {
         Cipher cipher = Cipher.getInstance(AES_CIPHER_ALGORITHM);
         cipher.init(Cipher.DECRYPT_MODE, key, iv);
         byte[] decryptedData = cipher.doFinal(Base64.getDecoder().decode(encryptedData));

@@ -8,8 +8,8 @@ import java.util.Base64;
 
 public class SecurityUtils {
 
-    // Protected constructor to prevent instantiation
-    protected SecurityUtils() {}
+    // Private constructor to prevent instantiation
+    private SecurityUtils() {}
 
     /**
      * Generates a salt for hashing.
@@ -17,9 +17,9 @@ public class SecurityUtils {
      * @return A Base64 encoded salt
      */
     protected static String generateSalt() {
-        SecureRandom random = new SecureRandom();
+        SecureRandom secureRandom = new SecureRandom();
         byte[] salt = new byte[16];
-        random.nextBytes(salt);
+        secureRandom.nextBytes(salt);
         return Base64.getEncoder().encodeToString(salt);
     }
 
@@ -32,9 +32,9 @@ public class SecurityUtils {
      * @throws NoSuchAlgorithmException If SHA-256 algorithm is not available
      */
     protected static String hashData(String input, String salt) throws NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        md.update(salt.getBytes(StandardCharsets.UTF_8));
-        byte[] hashedData = md.digest(input.getBytes(StandardCharsets.UTF_8));
+        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+        messageDigest.update(salt.getBytes(StandardCharsets.UTF_8));
+        byte[] hashedData = messageDigest.digest(input.getBytes(StandardCharsets.UTF_8));
         return Base64.getEncoder().encodeToString(hashedData);
     }
 

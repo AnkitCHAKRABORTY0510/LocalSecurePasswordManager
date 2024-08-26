@@ -16,22 +16,23 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class Database {
-    
 
-    
-    private static final String DB_URL = "jdbc:sqlite:data/password_manager.db";
+    private static final String DATA_DIR = System.getProperty("user.dir") + File.separator + "data";
+    private static final String DB_URL = "jdbc:sqlite:" + DATA_DIR + File.separator + "password_manager.db";
 
     public static Connection connect() {
         Connection conn = null;
         try {
-            File dbDir = new File("data");
+            // Create the directory if it doesn't exist
+            File dbDir = new File(DATA_DIR);
             if (!dbDir.exists()) {
                 dbDir.mkdirs();
             }
+
             conn = DriverManager.getConnection(DB_URL);
             System.out.println("Connection to SQLite has been established.");
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Failed to connect to the database: " + e.getMessage());
         }
         return conn;
     }
@@ -56,23 +57,23 @@ public class Database {
              Statement stmt = conn.createStatement()) {
             stmt.execute(createUsersTable);
             stmt.execute(createEncryptionKeysTable);
-            
+
+            // Generate and store the key and IV
             try {
                 generateAndStoreKey();
             } catch (Exception ex) {
-                Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Database.class.getName()).log(Level.SEVERE, "Error generating/storing key: ", ex);
             }
-        
+
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Failed to create tables: " + e.getMessage());
         }
     }
 
     // Inserts a new user into the users table
     public static void insertUser(String username, String password, String salt, String userID) {
         String sql = "INSERT INTO users(username, password, salt, user_id) VALUES(?,?,?,?)";
-        
-        
+
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
@@ -81,21 +82,21 @@ public class Database {
             pstmt.setString(4, userID);
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Failed to insert user: " + e.getMessage());
         }
     }
 
     // Inserts the secret key and IV into the encryption_keys table
     protected static void insertEncryptionKeys(String secretKey, String iv) {
         String sql = "INSERT INTO encryption_keys(secret_key, iv) VALUES(?,?)";
-        
+
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, secretKey);
             pstmt.setString(2, iv);
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Failed to insert encryption keys: " + e.getMessage());
         }
     }
 
@@ -107,6 +108,7 @@ public class Database {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
+                System.out.println("\n\nsecret_key " + rs.getString("secret_key"));
                 return rs.getString("secret_key");
             }
         }
@@ -121,6 +123,7 @@ public class Database {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
+                System.out.println("IVkey " + rs.getString("iv"));
                 return rs.getString("iv");
             }
         }
@@ -156,8 +159,7 @@ public class Database {
 
         return EncryptionUtils.decrypt(encryptedUsername, secretKey, iv);
     }
-    
-    
+
     public static boolean userExists(String username) throws Exception {
         String sql = "SELECT * FROM users WHERE username = ?";
 
@@ -169,37 +171,37 @@ public class Database {
             ResultSet rs = pstmt.executeQuery();
             return rs.next();
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Failed to check if user exists: " + e.getMessage());
             return false;
         }
     }
 
     public static boolean validateLogin(String username, String password) throws SQLException, NoSuchAlgorithmException, Exception {
         String sql = "SELECT * FROM users WHERE username = ?";
-        
+
         String encryptedUsername = encryptUsername(username);
+        System.out.println("encryptedusename: " + encryptedUsername);
         
         try (Connection conn = connect();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, encryptedUsername);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 String storedPassword = rs.getString("password");
                 String salt = rs.getString("salt");
                 String hashedPassword = SecurityUtils.hashData(password, salt);
+                System.out.println("hashedPassword :"+hashedPassword);
                 return storedPassword.equals(hashedPassword);
             }
         }
         return false;
     }
 
-    
-
     public static String getUserID(String username) throws SQLException, Exception {
         String sql = "SELECT user_id FROM users WHERE username = ?";
-        
+
         String encryptedUsername = encryptUsername(username);
-        
+
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, encryptedUsername);
@@ -210,8 +212,8 @@ public class Database {
         }
         return null;
     }
-    
-   protected static void generateAndStoreKey() throws Exception{
+
+    protected static void generateAndStoreKey() throws Exception {
         // Generate and store the secret key and IV
         SecretKey secretKey = EncryptionUtils.generateSecretKey();
         IvParameterSpec iv = EncryptionUtils.generateIv();
@@ -220,8 +222,41 @@ public class Database {
         String encodedIv = Base64.getEncoder().encodeToString(iv.getIV());
 
         Database.insertEncryptionKeys(encodedSecretKey, encodedIv);
-   }
-   
+    }
+    
+    /**
+     * Updates user details in the users table based on the provided user ID.
+     *
+     * @param userID The unique ID of the user to update.
+     * @param username The new username (encrypted) for the user.
+     * @param password The new hashed password for the user.
+     * @param salt The new salt used for hashing the password.
+     * @return true if the update was successful, false otherwise.
+     */
+    protected static boolean updateUserDetails(String userID, String username, String password, String salt) {
+        String sql = "UPDATE users SET username = ?, password = ?, salt = ? WHERE user_id = ?";
 
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
+            // Encrypt the username before storing it
+            
+
+            pstmt.setString(1, username);
+            pstmt.setString(2, password);
+            pstmt.setString(3, salt);
+            pstmt.setString(4, userID);
+
+            int affectedRows = pstmt.executeUpdate();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            System.out.println("Failed to update user details: " + e.getMessage());
+            return false;
+        } catch (Exception e) {
+            System.out.println("Failed to encrypt username: " + e.getMessage());
+            return false;
+        }
+    }
+
+    
 }

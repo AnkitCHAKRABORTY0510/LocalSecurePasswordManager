@@ -39,6 +39,8 @@ public class NewUserController {
     @FXML
     private Label CreateUserMessage;
     @FXML
+    private Label CreateUserMessageSuccess;
+    @FXML
     private PasswordField PasswordPasswordField;
     @FXML
     private ImageView UserPasswordToggle;
@@ -65,33 +67,34 @@ public class NewUserController {
     }
     
     private boolean isValidEmail(String email) {
-    String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@" + 
-                        "(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
-    return email.matches(emailRegex);
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@" +
+                            "(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        return email.matches(emailRegex);
     }
     
-    public  void CreateUserButtonOn(ActionEvent e) throws Exception {
-    if (!UserNameTextField.getText().isBlank() && !PasswordTextField.getText().isBlank()) {
-        if (!isValidEmail(EmailTextField.getText())) {
-            CreateUserMessage.setText("Invalid email address!");
-            return;
-        }
-        
-        try {
-            if (CreateNewUser(UserNameTextField.getText(), PasswordTextField.getText(), FirstNameTextField.getText(),
-                    LastNameTextField.getText(), EmailTextField.getText(), PhoneNoTextField.getText())) {
-                CreateUserMessage.setText("User created successfully!");
-            } else {
-                CreateUserMessage.setText("Username already exists!");
+    public void CreateUserButtonOn(ActionEvent e) throws Exception {
+        if (!UserNameTextField.getText().isBlank() && !PasswordTextField.getText().isBlank()) {
+            if (!isValidEmail(EmailTextField.getText())) {
+                CreateUserMessage.setText("Invalid email address!");
+                return;
             }
-        } catch (SQLException | NoSuchAlgorithmException ex) {
-            Logger.getLogger(NewUserController.class.getName()).log(Level.SEVERE, null, ex);
-            CreateUserMessage.setText("Error creating user!");
+            
+            try {
+                if (CreateNewUser(UserNameTextField.getText(), PasswordTextField.getText(), FirstNameTextField.getText(),
+                        LastNameTextField.getText(), EmailTextField.getText(), PhoneNoTextField.getText())) {
+                        CreateUserMessage.setText("");
+                    CreateUserMessageSuccess.setText("User created successfully!");
+                } else {
+                    CreateUserMessage.setText("Username already exists!");
+                }
+            } catch (SQLException | NoSuchAlgorithmException ex) {
+                Logger.getLogger(NewUserController.class.getName()).log(Level.SEVERE, null, ex);
+                CreateUserMessage.setText("Error creating user!");
+            }
+        } else {
+            CreateUserMessage.setText("Please enter username and password!");
         }
-    } else {
-        CreateUserMessage.setText("Please enter username and password!");
     }
-}
     
     private boolean CreateNewUser(String userName, String password, String firstName, String lastName, String email, String phoneNo) throws Exception {
         if (userExists(userName)) {
@@ -103,62 +106,50 @@ public class NewUserController {
         String salt = SecurityUtils.generateSalt();
         String hashedPassword = SecurityUtils.hashData(password, salt);
         
-        
         // Encrypt user details
         UserSession userSession = UserSession.getInstance();
-//        userSession.setSecretKey(EncryptionUtils.generateSecretKey());
-//        userSession.setIv(EncryptionUtils.generateIv());
         userSession.setUserCreationDateTime(getCurrentTimestamp());
         
-        
-        //generate userid
+        // Generate user ID
         String UserID = generateUserID();        
         userSession.setUserID(UserID);
         
         SecretKey userSecretKey = EncryptionUtils.generateSecretKey();
-        IvParameterSpec userIv= EncryptionUtils.generateIv();
+        IvParameterSpec userIv = EncryptionUtils.generateIv();
         
-        userSession.setuserSecretKey(userSecretKey);
-        userSession.setuserIv(userIv);
-        //store userid and data secret & IV into keys.db
+        userSession.setUserSecretKey(userSecretKey);
+        userSession.setUserIv(userIv);
+        
+        // Store user ID and data secret & IV into keys.db
         storeEncryptedUserIDAndKeys(UserID, userIv, userSecretKey);
     
         userSession.setSecretKey(ankit);
         userSession.setIv(chakraborty);
         
-        
-        
-        String encryptedFirstName = EncryptionUtils.encrypt(firstName, userSession.getuserSecretKey(), userSession.getuserIv());
-        String encryptedLastName = EncryptionUtils.encrypt(lastName, userSession.getuserSecretKey(), userSession.getuserIv());
-        String encryptedEmail = EncryptionUtils.encrypt(email, userSession.getuserSecretKey(), userSession.getuserIv());
-        String encryptedPhoneNo = EncryptionUtils.encrypt(phoneNo, userSession.getuserSecretKey(), userSession.getuserIv());
-        userSession.setUserCreationDateTime(getCurrentTimestamp());
-        String UserCreationDateTime = EncryptionUtils.encrypt(userSession.getUserCreationDateTime(), userSession.getuserSecretKey(), userSession.getuserIv());
-        String encryptedUsername = EncryptionUtils.encrypt(userName, userSession.getuserSecretKey(), userSession.getuserIv());
+        String encryptedFirstName = EncryptionUtils.encrypt(firstName, userSession.getUserSecretKey(), userSession.getUserIv());
+        String encryptedLastName = EncryptionUtils.encrypt(lastName, userSession.getUserSecretKey(), userSession.getUserIv());
+        String encryptedEmail = EncryptionUtils.encrypt(email, userSession.getUserSecretKey(), userSession.getUserIv());
+        String encryptedPhoneNo = EncryptionUtils.encrypt(phoneNo, userSession.getUserSecretKey(), userSession.getUserIv());
+        String UserCreationDateTime = EncryptionUtils.encrypt(userSession.getUserCreationDateTime(), userSession.getUserSecretKey(), userSession.getUserIv());
+        String encryptedUsername = EncryptionUtils.encrypt(userName, userSession.getUserSecretKey(), userSession.getUserIv());
 
-        String encryptUsername = Database.encryptUsername(userName);//common database//using database secrete key
-        // Insert into the database
+        String encryptUsername = Database.encryptUsername(userName); // Common database using database secret key
         Database.insertUser(encryptUsername, hashedPassword, salt, UserID);
         
-        
         userSession.initializeDatabase(UserID);
-        storeKeysInDatabase(ankit,chakraborty);
-        
-        
+        storeKeysInDatabase(ankit, chakraborty);
 
-        // Insert additional user details        
-        insertUserDetailsToUserDatabase(encryptedUsername, encryptedFirstName, encryptedLastName, encryptedEmail, encryptedPhoneNo, UserCreationDateTime,UserID);//username for user specific database.
+        insertUserDetailsToUserDatabase(encryptedUsername, encryptedFirstName, encryptedLastName, encryptedEmail, encryptedPhoneNo, UserCreationDateTime, UserID);
         UserSession.getInstance().logout();
         return true;
     }
 
     private void insertUserDetailsToUserDatabase(String encryptedUsername, String encryptedFirstName, String encryptedLastName, String encryptedEmail, String encryptedPhoneNo, String UserCreationDateTime, String UserID) throws SQLException {
-        // Insert user details into the user-specific database
         String sql = "INSERT INTO userinformation (username, first_name, last_name, user_creation_time, email_id, phone_number, user_id) VALUES(?,?,?,?,?,?,?)";
-        String dbUrl = UserSession.getInstance().getUserID(); // Assuming it returns the correct DB path
+        String dbUrl = UserSession.getInstance().getUserID(); 
         
         try (Connection conn = DriverManager.getConnection(UserSession.getInstance().getDatabasePath(dbUrl));
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, encryptedUsername);
             pstmt.setString(2, encryptedFirstName);
             pstmt.setString(3, encryptedLastName);
@@ -172,54 +163,35 @@ public class NewUserController {
         }
     }
     
-    //store in each user database
     private void storeKeysInDatabase(SecretKey secretKey, IvParameterSpec iv) {
-        // Convert SecretKey and IvParameterSpec to Base64 encoded strings
         String encodedSecretKey = Base64.getEncoder().encodeToString(secretKey.getEncoded());
         String encodedIv = Base64.getEncoder().encodeToString(iv.getIV());
 
-        // SQL to insert the encoded secret key and IV into the encryption_keys table
         String sql = "INSERT INTO encryption_keys (encrypted_secret_key, encrypted_iv) VALUES(?, ?)";
 
-        // Get the user-specific database path
         String dbUrl = UserSession.getInstance().getUserID();
 
         try (Connection conn = DriverManager.getConnection(UserSession.getInstance().getDatabasePath(dbUrl));
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            // Set the encoded values into the SQL statement
             pstmt.setString(1, encodedSecretKey);
             pstmt.setString(2, encodedIv);
-
-            // Execute the update
             pstmt.executeUpdate();
-
         } catch (SQLException e) {
             System.out.println("Error storing keys: " + e.getMessage());
         }
     }
 
-    
-    
     private void storeEncryptedUserIDAndKeys(String userID, IvParameterSpec userIV, SecretKey userSecretKey) throws Exception {
-        // Generate a new secret key and IV
         this.ankit = EncryptionUtils.generateSecretKey();
         this.chakraborty = EncryptionUtils.generateIv();
 
-        // Encrypt the userID
         String encryptedUserID = EncryptionUtils.encrypt(userID, this.ankit, this.chakraborty);
 
-        // Convert SecretKey and IvParameterSpec to Base64 encoded strings
         String encodedSecretKey = Base64.getEncoder().encodeToString(userSecretKey.getEncoded());
         String encodedIv = Base64.getEncoder().encodeToString(userIV.getIV());
 
-        // Store the encrypted userID, secret key, and IV in the third table of the user-specific database
         String sql = "INSERT INTO encryption_keys (encrypted_user_id, secret_key, iv) VALUES(?, ?, ?)";
-        
-        System.out.println("hoho1");
-        
-        
-        
+
         try (Connection conn = DriverManager.getConnection(UserKeysDatabase.DB_URL);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, encryptedUserID);
@@ -227,16 +199,13 @@ public class NewUserController {
             pstmt.setString(3, encodedIv);
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("hoho2");
-            System.out.println(e.getMessage());
+            System.out.println("Error storing encrypted user ID and keys: " + e.getMessage());
         }
-        System.out.println("hoho3");
     }
     
     private boolean userExists(String username) throws SQLException, Exception {
         return Database.userExists(username);
     }
-    
 
     private String generateUserID() {
         return UUID.randomUUID().toString();
@@ -248,37 +217,28 @@ public class NewUserController {
     
     @FXML
     private void switchToLogin() throws IOException {
-        App.setRoot("Login");
+        App.setRoot("login");
     }
     
     @FXML
     private void handleTogglePasswordVisibility(MouseEvent event) {
-        // Toggle visibility between PasswordField and TextField
-       
         if (isPasswordVisible) {
-            // Hide password (show PasswordField, hide TextField)
             PasswordTextField.setVisible(false);
             PasswordPasswordField.setVisible(true);
-            loadImage("Images/passwordshowlogin.png"+ "");
+            loadImage("Images/passwordshowlogin.png"); // Fixed the path format
         } else {
-            // Show password (hide PasswordField, show TextField)
             PasswordTextField.setVisible(true);
             PasswordPasswordField.setVisible(false);
             loadImage("Images/passwordhidelogin.png");
         }
-        // Toggle the state
         isPasswordVisible = !isPasswordVisible;
     }
     
     private void addToggleEventListener() {
-        
-        // Add click listener to the ImageView (toggle button)
         UserPasswordToggle.setOnMouseClicked(this::handleTogglePasswordVisibility);
-        
     }
 
     private void loadImage(String imagePath) {
-        // Detailed debugging to ensure image loading
         InputStream imageStream = getClass().getResourceAsStream(imagePath);
         if (imageStream == null) {
             System.err.println("Error: Image not found at " + imagePath);

@@ -1,5 +1,6 @@
 package com.mycompany.securepasswordmanager;
 
+import java.io.File;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -29,8 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.scene.control.Label;
-import javafx.scene.layout.AnchorPane;
+
 import javafx.stage.Modality;
 import javafx.util.Duration;
 
@@ -89,7 +89,7 @@ public class AddNewPasswordDialogController {
         GenerateRandomPassword.setOnAction(event -> {
             PasswordData generatedPassword = PasswordGenerator.generatePassword(passwordLength);
             if (generatedPassword != null) {
-                String decryptedPassword = decryptPassword(generatedPassword);//decrypt the genenrated password before showing
+                String decryptedPassword = decryptPassword(generatedPassword);//decrypt the generated password before showing
                 passwordField.setText(decryptedPassword);
             } else {
                 showAlert("Error", "Failed to generate password.");
@@ -132,7 +132,7 @@ public class AddNewPasswordDialogController {
     }
     
     
-    //decrypt the generate password based on the data encripted data provided
+    //decrypt the generate password based on the data encrypted data provided
     private String decryptPassword(PasswordData passwordData) {
         try {
             System.out.println("\n\nAdd New Password \n "+ passwordData.getUrl());
@@ -219,7 +219,7 @@ public class AddNewPasswordDialogController {
         byte[] salt = generateSalt();
         String encryptedPasswordWithSalt = encryptPassword(originalPassword, salt);
         if (encryptedPasswordWithSalt != null) {
-            storePasswordInDatabase(url,account, encryptedPasswordWithSalt, description);
+            storePasswordInDatabase(url, account, encryptedPasswordWithSalt, description);
         }
     }
 
@@ -229,14 +229,17 @@ public class AddNewPasswordDialogController {
         String encryptedPassword = parts[1];
         
         UserSession session = UserSession.getInstance();
-        url=EncryptionUtils.encrypt(url,session.getuserSecretKey(),session.getuserIv());
-        account=EncryptionUtils.encrypt(account,session.getuserSecretKey(),session.getuserIv());
-        description=EncryptionUtils.encrypt(description,session.getuserSecretKey(),session.getuserIv());
-        encryptedPassword=EncryptionUtils.encrypt(encryptedPassword,session.getuserSecretKey(),session.getuserIv());
-        salt=EncryptionUtils.encrypt(salt,session.getuserSecretKey(),session.getuserIv());
-        
-        String dbUrl = "jdbc:sqlite:Data/Users/" + session.getUserID() + ".db";
-        String insertSQL = "INSERT INTO passwords (url, Account, salt, encrypted_password, description, username) VALUES (?, ?, ?, ?, ?, ?)";
+        url = EncryptionUtils.encrypt(url, session.getUserSecretKey(), session.getUserIv());
+        account = EncryptionUtils.encrypt(account, session.getUserSecretKey(), session.getUserIv());
+        description = EncryptionUtils.encrypt(description, session.getUserSecretKey(), session.getUserIv());
+        encryptedPassword = EncryptionUtils.encrypt(encryptedPassword, session.getUserSecretKey(), session.getUserIv());
+        salt = EncryptionUtils.encrypt(salt, session.getUserSecretKey(), session.getUserIv());
+
+        // Make sure to use OS-independent paths
+        String baseDir = System.getProperty("user.home") + File.separator + "SecurePasswordManager" + File.separator + "Data" + File.separator + "Users" + File.separator;
+        // Construct the database URL using a relative path
+    String dbUrl = "jdbc:sqlite:" + "Data" + File.separator + "Users" + File.separator + session.getUserID() + ".db";
+    String insertSQL = "INSERT INTO passwords (url, Account, salt, encrypted_password, description) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection connection = DriverManager.getConnection(dbUrl);
              PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
@@ -246,7 +249,6 @@ public class AddNewPasswordDialogController {
             preparedStatement.setString(3, salt);
             preparedStatement.setString(4, encryptedPassword);
             preparedStatement.setString(5, description);
-            preparedStatement.setString(6, session.getUsername());
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {

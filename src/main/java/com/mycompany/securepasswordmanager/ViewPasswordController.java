@@ -51,6 +51,8 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import java.nio.file.Paths; // Import Paths
+import javafx.scene.control.Tooltip;
 
 public class ViewPasswordController {
 
@@ -78,7 +80,7 @@ public class ViewPasswordController {
 
     private void openAddPasswordDialog() throws Exception {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("AddNewPasswordDialog.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Fxml/AddNewPasswordDialog.fxml"));
             DialogPane dialogPane = loader.load();
 
             AddNewPasswordDialogController controller = loader.getController();
@@ -111,7 +113,7 @@ public class ViewPasswordController {
 
     protected void loadPasswordsFromDatabase() throws Exception {
     UserSession userSession = UserSession.getInstance();
-    String dbUrl = "jdbc:sqlite:data/users/" + userSession.getUserID() + ".db";
+    String dbUrl = "jdbc:sqlite:" + Paths.get("data", "users", userSession.getUserID() + ".db").toString(); // Platform-independent path
     String selectSQL = "SELECT id, url, Account, encrypted_password, salt, description FROM passwords";
     UserSession session = UserSession.getInstance();
     try (Connection connection = DriverManager.getConnection(dbUrl);
@@ -124,20 +126,20 @@ public class ViewPasswordController {
             int id = resultSet.getInt("id");
           
             String url = resultSet.getString("url");
-            url=EncryptionUtils.decrypt(url,session.getuserSecretKey(),session.getuserIv());
+            url=EncryptionUtils.decrypt(url,session.getUserSecretKey(),session.getUserIv());
             
             String Account = resultSet.getString("Account");
-            Account=EncryptionUtils.decrypt(Account,session.getuserSecretKey(),session.getuserIv());
+            Account=EncryptionUtils.decrypt(Account,session.getUserSecretKey(),session.getUserIv());
             
             String encryptedPassword = resultSet.getString("encrypted_password");
-            encryptedPassword=EncryptionUtils.decrypt(encryptedPassword,session.getuserSecretKey(),session.getuserIv());
+            encryptedPassword=EncryptionUtils.decrypt(encryptedPassword,session.getUserSecretKey(),session.getUserIv());
             
             String salt = resultSet.getString("salt");
-            salt=EncryptionUtils.decrypt(salt,session.getuserSecretKey(),session.getuserIv());
+            salt=EncryptionUtils.decrypt(salt,session.getUserSecretKey(),session.getUserIv());
             
             
             String description = resultSet.getString("description");
-            description=EncryptionUtils.decrypt(description,session.getuserSecretKey(),session.getuserIv());
+            description=EncryptionUtils.decrypt(description,session.getUserSecretKey(),session.getUserIv());
             
             String decryptPassword=decryptPassword(encryptedPassword,salt);//to get mine original password
             passwordList.add(new PasswordData(id, url ,Account, encryptedPassword, decryptPassword, salt, description));
@@ -223,6 +225,7 @@ public class ViewPasswordController {
 
     
     
+
     private void displayPasswords(List<PasswordData> passwordList) {
         passwordsContainer.getChildren().clear();
 
@@ -231,17 +234,29 @@ public class ViewPasswordController {
 
             HBox hBox = new HBox();
             hBox.setPrefHeight(35.0);
-            hBox.setPrefWidth(969.0);
+            hBox.setPrefWidth(995.0);
             hBox.setSpacing(10);
 
             Label urlLabel = new Label(passwordData.getUrl());
             urlLabel.setPrefHeight(35.0);
-            urlLabel.setPrefWidth(270.0);
+            urlLabel.setPrefWidth(300.0);
             urlLabel.setTextAlignment(TextAlignment.CENTER);
             urlLabel.setAlignment(Pos.CENTER);
             urlLabel.setFont(new Font("Avenir Black", 14.0));
             urlLabel.setStyle("-fx-border-color: blue; -fx-border-radius: 5; -fx-background-color: #E3F4FB;");
             HBox.setHgrow(urlLabel, Priority.ALWAYS);
+            //tooltip 
+            // Create the Tooltip
+            Tooltip urltooltip = new Tooltip();
+            urltooltip.setText(passwordData.getUrl()); // Bind the tooltip text to the label text
+            urltooltip.setTextAlignment(TextAlignment.CENTER);
+            urltooltip.setWrapText(true);
+            urltooltip.setFont(new Font("Avenir Black", 12.0));
+            
+            urltooltip.setShowDelay(Duration.seconds(0.1));
+            urltooltip.setHideDelay(Duration.seconds(0.1));
+            // Assign the Tooltip to the Label
+            urlLabel.setTooltip(urltooltip);
 
             Label accountLabel = new Label(passwordData.getAccount());
             accountLabel.setPrefHeight(35.0);
@@ -254,11 +269,24 @@ public class ViewPasswordController {
             sepiaTone.setLevel(0.42);
             accountLabel.setEffect(sepiaTone);
             HBox.setHgrow(accountLabel, Priority.ALWAYS);
+            
+            //tooltip 
+            // Create the Tooltip
+            Tooltip Accounttooltip = new Tooltip();
+            Accounttooltip.setText(passwordData.getAccount()); // Bind the tooltip text to the label text
+            Accounttooltip.setTextAlignment(TextAlignment.CENTER);
+            Accounttooltip.setWrapText(true);
+            Accounttooltip.setFont(new Font("Avenir Black", 12.0));
+            
+            Accounttooltip.setShowDelay(Duration.seconds(0.1));
+            Accounttooltip.setHideDelay(Duration.seconds(0.1));
+            // Assign the Tooltip to the Label
+            accountLabel.setTooltip(Accounttooltip);
 
             TextField passwordTextField = new TextField();
             passwordTextField.setText(decryptedPassword);
             passwordTextField.setPrefHeight(35.0);
-            passwordTextField.setPrefWidth(280.0);
+            passwordTextField.setPrefWidth(225.0);
             passwordTextField.setFont(new Font("Avenir Black", 14.0));
             passwordTextField.setEditable(false);
             passwordTextField.setVisible(false);
@@ -266,7 +294,7 @@ public class ViewPasswordController {
             PasswordField passwordField = new PasswordField();
             passwordField.setText(decryptedPassword);
             passwordField.setPrefHeight(35.0);
-            passwordField.setPrefWidth(280.0);
+            passwordField.setPrefWidth(225.0);
             passwordField.setEditable(false);
 
             passwordTextField.managedProperty().bind(passwordTextField.visibleProperty());
@@ -275,7 +303,7 @@ public class ViewPasswordController {
 
             AnchorPane passwordFieldContainer = new AnchorPane();
             passwordFieldContainer.setPrefHeight(35.0);
-            passwordFieldContainer.setPrefWidth(280.0);
+            passwordFieldContainer.setPrefWidth(225.0);
             passwordFieldContainer.getChildren().addAll(passwordTextField, passwordField);
             AnchorPane.setRightAnchor(passwordField, 0.0);
 
@@ -375,6 +403,7 @@ public class ViewPasswordController {
             passwordsContainer.getChildren().add(hBox);
         }
     }
+    
 
     
     private void showInfoDialog(PasswordData passwordData) {
@@ -382,7 +411,7 @@ public class ViewPasswordController {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("PASSWORD ID: " + passwordData.getId());
         alert.setHeaderText("Details for: " + passwordData.getUrl());
-        alert.setContentText("Description: " + passwordData.getDescription());
+        alert.setContentText("Account: "+ passwordData.getAccount() + "\nDescription: " + passwordData.getDescription());
 
         DialogPane dialogPane = alert.getDialogPane();
         dialogPane.setMinHeight(Region.USE_PREF_SIZE);
@@ -458,7 +487,7 @@ public class ViewPasswordController {
    
    private void openEditDialog(PasswordData passwordData) throws Exception {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("EditPasswordDialog.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Fxml/EditPasswordDialog.fxml"));
             DialogPane dialogPane = loader.load();
 
             EditPasswordDialogController controller = loader.getController();

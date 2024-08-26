@@ -7,6 +7,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -27,7 +29,6 @@ import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javafx.scene.layout.AnchorPane;
 
 public class EditPasswordDialogController {
@@ -97,7 +98,7 @@ public class EditPasswordDialogController {
         GenerateRandomPassword.setOnAction(event -> {
             PasswordData generatedPassword = PasswordGenerator.generatePassword(passwordLength);
             if (generatedPassword != null) {
-                String decryptedPassword = decryptPassword(generatedPassword);//decrypt the genenrated password before showing
+                String decryptedPassword = decryptPassword(generatedPassword); // Decrypt the generated password before showing
                 passwordField.setText(decryptedPassword);
             } else {
                 showAlert("Error", "Failed to generate password.");
@@ -120,7 +121,6 @@ public class EditPasswordDialogController {
         String url = urlField.getText();
         String password = passwordField.getText();
         
-
         if (url == null || url.trim().isEmpty()) {
             urlField.setText(CurrentUrlField.getText());
             return true;
@@ -143,23 +143,16 @@ public class EditPasswordDialogController {
         this.passwordData = passwordData;
         CurrentUrlField.setText(passwordData.getUrl());
         CurrentAccountField.setText(passwordData.getAccount());
-        
-        
-        CurrentPasswordField.setText(passwordData.getdecryptedPassword());
+        CurrentPasswordField.setText(passwordData.getDecryptedPassword());
         descriptionArea.setText(passwordData.getDescription());
     }
     
-    
-    //decrypt the generate password based on the data encripted data provided
     private String decryptPassword(PasswordData passwordData) {
         try {
-            System.out.println("\n\nEditPassword \n "+ passwordData.getUrl());
             byte[] decodedKey = Base64.getDecoder().decode(passwordData.getSalt());
-            System.out.println("decoded key  "+ decodedKey);
             SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
             
             byte[] encryptedBytes = Base64.getDecoder().decode(passwordData.getEncryptedPassword());
-            System.out.println("encrypted key" + encryptedBytes);
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.DECRYPT_MODE, originalKey);
             byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
@@ -217,33 +210,11 @@ public class EditPasswordDialogController {
     private void preprocessingPassword() throws Exception {
         String url, originalPassword, account, description;
 
-        // Check if urlField is not null, otherwise use CurrentUrlField
-        if (urlField.getText() != null && !urlField.getText().isEmpty()) {
-            url = urlField.getText();
-        } else {
-            url = CurrentUrlField.getText();
-        }
+        url = urlField.getText() != null && !urlField.getText().isEmpty() ? urlField.getText() : CurrentUrlField.getText();
+        originalPassword = passwordField.getText() != null && !passwordField.getText().isEmpty() ? passwordField.getText() : CurrentPasswordField.getText();
+        account = AccountField.getText() != null && !AccountField.getText().isEmpty() ? AccountField.getText() : CurrentAccountField.getText();
+        description = descriptionArea.getText() != null && !descriptionArea.getText().isEmpty() ? descriptionArea.getText() : "";
 
-        // Check if passwordField is not null, otherwise you might want to handle it or assign a default
-        if (passwordField.getText() != null && !passwordField.getText().isEmpty()) {
-            originalPassword = passwordField.getText();
-        } else {
-            originalPassword = CurrentPasswordField.getText(); // or handle accordingly
-        }
-
-        // Check if AccountField is not null, otherwise handle it
-        if (AccountField.getText() != null && !AccountField.getText().isEmpty()) {
-            account = AccountField.getText();
-        } else {
-            account = CurrentAccountField.getText() ; // Assign a default or handle accordingly
-        }
-
-        // Check if descriptionArea is not null, otherwise handle it
-        if (descriptionArea.getText() != null && !descriptionArea.getText().isEmpty()) {
-            description = descriptionArea.getText();
-        } else {
-            description = ""; // Assign a default or handle accordingly
-        }
         byte[] salt = generateSalt();
         String encryptedPasswordWithSalt = encryptPassword(originalPassword, salt);
         if (encryptedPasswordWithSalt != null) {
@@ -251,33 +222,30 @@ public class EditPasswordDialogController {
         }
     }
 
-    private void savePassword(String Url, String account, String encryptedPasswordWithSalt, String description) throws Exception {
-        
+    private void savePassword(String url, String account, String encryptedPasswordWithSalt, String description) throws Exception {
         String[] parts = encryptedPasswordWithSalt.split(":");
         String salt = parts[0];
         String encryptedPassword = parts[1];
         
-        
-        
         UserSession session = UserSession.getInstance();
-        Url=EncryptionUtils.encrypt(Url,session.getuserSecretKey(),session.getuserIv());
-        account=EncryptionUtils.encrypt(account,session.getuserSecretKey(),session.getuserIv());
-        description=EncryptionUtils.encrypt(description,session.getuserSecretKey(),session.getuserIv());
-        encryptedPassword=EncryptionUtils.encrypt(encryptedPassword,session.getuserSecretKey(),session.getuserIv());
-        salt=EncryptionUtils.encrypt(salt,session.getuserSecretKey(),session.getuserIv());
-        
-        
-        String dbUrl = "jdbc:sqlite:data/users/" + session.getUserID() + ".db";
+        url = EncryptionUtils.encrypt(url, session.getUserSecretKey(), session.getUserIv());
+        account = EncryptionUtils.encrypt(account, session.getUserSecretKey(), session.getUserIv());
+        description = EncryptionUtils.encrypt(description, session.getUserSecretKey(), session.getUserIv());
+        encryptedPassword = EncryptionUtils.encrypt(encryptedPassword, session.getUserSecretKey(), session.getUserIv());
+        salt = EncryptionUtils.encrypt(salt, session.getUserSecretKey(), session.getUserIv());
+
+        Path dbPath = Paths.get("data", "users", session.getUserID() + ".db");
+        String dbUrl = "jdbc:sqlite:" + dbPath.toString().replace("\\", "/");
         String updateSQL = "UPDATE passwords SET url = ?, Account =?, encrypted_password = ?, salt = ?, description = ? WHERE id = ?";
         
         try (Connection connection = DriverManager.getConnection(dbUrl);
              PreparedStatement statement = connection.prepareStatement(updateSQL)) {
 
-            statement.setString(1, Url);
+            statement.setString(1, url);
             statement.setString(2, account);
             statement.setString(3, encryptedPassword);
             statement.setString(4, salt);
-            statement.setString(5,description);
+            statement.setString(5, description);
             statement.setInt(6, passwordData.getId());
 
             statement.executeUpdate();
@@ -289,5 +257,4 @@ public class EditPasswordDialogController {
             showAlert("Error", "Failed to update password.");
         }
     }
-
 }

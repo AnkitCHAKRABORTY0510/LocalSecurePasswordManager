@@ -1,12 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.securepasswordmanager;
 
 /**
- *
- * @author mac
+ * Represents the data associated with a password entry.
  */
 public class PasswordData {
     private String encryptedPassword;
@@ -17,60 +12,76 @@ public class PasswordData {
     private int id;
     private String decryptedPassword;
     
-    protected  void setdecryptedPassword(String decryptedPassword)
-    {
-        this.decryptedPassword=decryptedPassword;
+    // Protected methods to set and get decryptedPassword
+    protected void setDecryptedPassword(String decryptedPassword) {
+        this.decryptedPassword = decryptedPassword;
     }
     
-    protected String getdecryptedPassword()
-    {
+    protected String getDecryptedPassword() {
         return decryptedPassword;
     }
 
-    // Existing getters and setters
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    // Getters and setters for other properties
+    public String getDescription() {
+        return description;
+    }
     
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
+    public int getId() {
+        return id;
+    }
+    
+    public void setId(int id) {
+        this.id = id;
+    }
 
-    public PasswordData(int id, String url,String account, String encryptedPassword,String decryptPassword, String salt, String description) {
+    // Constructors
+    public PasswordData(int id, String url, String account, String encryptedPassword, String decryptedPassword, String salt, String description) {
         this.encryptedPassword = encryptedPassword;
         this.salt = salt;
-        this.url= url;
-        this.id=id;
-        this.decryptedPassword=decryptPassword;
-        this.account=account;
-        this.description=description;
+        this.url = url;
+        this.id = id;
+        this.decryptedPassword = decryptedPassword;
+        this.account = account;
+        this.description = description;
     }
     
     public PasswordData(String encryptedPassword, String salt) {
-        System.out.println("encryptedPassword "+encryptedPassword);
-        System.out.println("salt " + salt);
+        log("Encrypted Password: " + encryptedPassword);
+        log("Salt: " + salt);
         this.encryptedPassword = encryptedPassword;
         this.salt = salt;
     }
 
+    // Getters for password-related fields
     public String getEncryptedPassword() {
-        System.out.println("encryptedPassword "+encryptedPassword);// my generated password
+        log("Encrypted Password: " + encryptedPassword); // Log for debugging
         return encryptedPassword;
     }
 
     public String getSalt() {
-        System.out.println("salt "+salt);//check///this data is taken out so that i can decrypt my generated password
+        log("Salt: " + salt); // Log for debugging
         return salt;
     }
     
     public String getUrl() {
-        System.out.println(url);
+        log("URL: " + url); // Log for debugging
         return url;
-        
     }
+
     public String getAccount() {
         return account;
     }
     
-    public void setAccount(String Account) {
-        this.account = Account;
+    public void setAccount(String account) {
+        this.account = account;
+    }
+    
+    // Utility method for logging
+    private void log(String message) {
+        System.out.println(message); // Replace with a proper logger if needed
     }
 }

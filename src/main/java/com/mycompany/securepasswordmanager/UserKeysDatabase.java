@@ -1,6 +1,8 @@
 package com.mycompany.securepasswordmanager;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -15,8 +17,8 @@ import javax.crypto.spec.SecretKeySpec;
 public class UserKeysDatabase {
 
     // Define the database URL
-    protected static String DB_URL = "jdbc:sqlite:data/keys/keys.db";
-    
+    protected static String DB_URL = getDatabaseUrl();
+
     // Static fields to store the secret key and IV
     protected static SecretKey DatasecretKey;
     protected static IvParameterSpec Dataiv;
@@ -41,16 +43,23 @@ public class UserKeysDatabase {
         Dataiv = dataiv;
     }
 
+    // Method to get the database URL based on the current OS
+    private static String getDatabaseUrl() {
+        // Use Paths.get() to construct the correct path for the OS
+        Path databasePath = Paths.get("data", "keys", "keys.db");
+        return "jdbc:sqlite:" + databasePath.toAbsolutePath().toString();
+    }
+
     // Method to connect to the database
     protected static Connection connectkey() {
         Connection conn = null;
         try {
             // Ensure the directory structure exists
-            File directory = new File("data/keys");
+            File directory = new File("data" + File.separator + "keys");
             if (!directory.exists()) {
                 boolean created = directory.mkdirs();
                 if (!created) {
-                    throw new SQLException("Failed to create directory: data/keys");
+                    throw new SQLException("Failed to create directory: " + directory.getAbsolutePath());
                 }
             }
 
@@ -143,6 +152,4 @@ public class UserKeysDatabase {
             }
         }
     }
-    
-    
 }

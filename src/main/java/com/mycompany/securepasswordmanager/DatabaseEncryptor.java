@@ -17,22 +17,21 @@ public class DatabaseEncryptor {
     private final SecretKey secretKey;
 
     public DatabaseEncryptor(String keyFilePath) throws Exception {
-        File keyFile = new File(keyFilePath);
-        if (keyFile.exists()) {
-            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(keyFile))) {
+        Path keyPath = Paths.get(keyFilePath);
+        if (Files.exists(keyPath)) {
+            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(keyPath.toFile()))) {
                 byte[] keyBytes = (byte[]) ois.readObject();
                 secretKey = new SecretKeySpec(keyBytes, ALGORITHM);
             }
         } else {
             // Create directories if they do not exist
-            Path keyPath = Paths.get(keyFilePath).getParent();
-            if (keyPath != null && !Files.exists(keyPath)) {
-                Files.createDirectories(keyPath);
+            if (!Files.exists(keyPath.getParent())) {
+                Files.createDirectories(keyPath.getParent());
             }
             KeyGenerator keyGen = KeyGenerator.getInstance(ALGORITHM);
-            keyGen.init(KEY_SIZE);
+            keyGen.init(KEY_SIZE, new SecureRandom());
             secretKey = keyGen.generateKey();
-            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(keyFile))) {
+            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(keyPath.toFile()))) {
                 oos.writeObject(secretKey.getEncoded());
             }
         }
@@ -49,9 +48,13 @@ public class DatabaseEncryptor {
     private void processFile(int cipherMode, String inputFilePath, String outputFilePath) throws Exception {
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(cipherMode, secretKey);
-        try (FileInputStream fis = new FileInputStream(inputFilePath);
-             FileOutputStream fos = new FileOutputStream(outputFilePath);
+        Path inputPath = Paths.get(inputFilePath);
+        Path outputPath = Paths.get(outputFilePath);
+
+        try (FileInputStream fis = new FileInputStream(inputPath.toFile());
+             FileOutputStream fos = new FileOutputStream(outputPath.toFile());
              CipherOutputStream cos = new CipherOutputStream(fos, cipher)) {
+
             byte[] bytes = new byte[1024];
             int numBytes;
             while ((numBytes = fis.read(bytes)) != -1) {

@@ -8,6 +8,7 @@ import javafx.scene.control.TextField;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.logging.Level;
@@ -16,10 +17,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 
-
-
 public class LoginController {
-    
+
     @FXML
     private TextField UserNameTextField;
     @FXML
@@ -30,9 +29,9 @@ public class LoginController {
     private TextField PasswordTextField;
     @FXML
     private ImageView UserPasswordToggle;
-    
+
     private boolean isPasswordVisible = false;
-    
+
     @FXML
     public void initialize() {
         // Set initial visibility and manage properties
@@ -48,9 +47,6 @@ public class LoginController {
         // Set up the toggle event listener
         addToggleEventListener();
     }
-    
-    
-    
 
     // Example usage in the login button action method
     public void LoginButtonOn(ActionEvent e) throws SQLException, NoSuchAlgorithmException, Exception {
@@ -58,26 +54,19 @@ public class LoginController {
             if (validateLogin(UserNameTextField.getText(), PasswordTextField.getText())) {
                 try {
                     UserSession session = UserSession.getInstance();
-                    session.setUserpassword(PasswordTextField.getText());
+                    session.setUserPassword(PasswordTextField.getText());
                     session.setUsername(UserNameTextField.getText());
                     session.setUserID(Database.getUserID(UserNameTextField.getText()));
-                    
+
                     session.initializeDatabase(session.getUserID());
-                    
-                    //one time encryption
+
+                    // One-time encryption
                     String encryptedUserID = EncryptionUtils.encrypt(session.getUserID(), session.getSecretKey(), session.getIv());
                     UserKeysDatabase.getKeysForUser(encryptedUserID);
-                    System.out.println(UserKeysDatabase.DatasecretKey);
-                    System.out.println(UserKeysDatabase.Dataiv);
-                    session.setuserSecretKey(UserKeysDatabase.DatasecretKey);
-                    session.setuserIv(UserKeysDatabase.Dataiv);
-                    session.fetchAndSetUserDetails();//encrypt remaining details
                     
-                    // Fetch and set user details
-                    //fetchAndSetUserDetails(session.getUserID());
-
-                    // Optionally initialize the user's database
-                    //session.initializeDatabase(UserID);
+                    session.setUserSecretKey(UserKeysDatabase.DatasecretKey);
+                    session.setUserIv(UserKeysDatabase.Dataiv);
+                    session.fetchAndSetUserDetails(); // Encrypt remaining details
 
                     switchToMainScreen();
                 } catch (IOException ex) {
@@ -90,14 +79,10 @@ public class LoginController {
             CreateUserMessage.setText("Please Enter username and password!!");
         }
     }
-    
-    
+
     private boolean validateLogin(String username, String password) throws SQLException, NoSuchAlgorithmException, Exception {
-        
         return Database.validateLogin(username, password);
     }
-
-    
 
     @FXML
     private void switchToNewUser() throws IOException {
@@ -106,44 +91,52 @@ public class LoginController {
 
     @FXML
     private void switchToMainScreen() throws IOException {
-        App.setRoot("MainView", 1200, 800);
+        App.setRoot("MainView", 1325, 800);
     }
-    
+
     @FXML
     private void handleTogglePasswordVisibility(MouseEvent event) {
         // Toggle visibility between PasswordField and TextField
-       
         if (isPasswordVisible) {
             // Hide password (show PasswordField, hide TextField)
             PasswordTextField.setVisible(false);
             PasswordPasswordField.setVisible(true);
-            loadImage("Images/passwordshowlogin.png"+ "");
+            loadImage("Images/passwordshowlogin.png"); // Path adjusted for resource loading
         } else {
             // Show password (hide PasswordField, show TextField)
             PasswordTextField.setVisible(true);
             PasswordPasswordField.setVisible(false);
-            loadImage("Images/passwordhidelogin.png");
+            loadImage("Images/passwordhidelogin.png"); // Path adjusted for resource loading
         }
         // Toggle the state
         isPasswordVisible = !isPasswordVisible;
     }
-    
+
     private void addToggleEventListener() {
-        
         // Add click listener to the ImageView (toggle button)
         UserPasswordToggle.setOnMouseClicked(this::handleTogglePasswordVisibility);
-        
     }
 
     private void loadImage(String imagePath) {
-        // Detailed debugging to ensure image loading
-        InputStream imageStream = getClass().getResourceAsStream(imagePath);
-        if (imageStream == null) {
-            System.err.println("Error: Image not found at " + imagePath);
-        } else {
+    try {
+        // Load the image using getClass().getResource()
+        // This ensures the path works across both Windows and Linux
+        URL imageURL = getClass().getResource(imagePath);
+        
+        if (imageURL != null) {
+            // Image found, load it
+            UserPasswordToggle.setImage(new Image(imageURL.toString()));
             System.out.println("Loading image from: " + imagePath);
-            UserPasswordToggle.setImage(new Image(imageStream));
+        } else {
+            // Image not found, handle the error
+            System.err.println("Error: Image not found at " + imagePath);
         }
+    } catch (Exception e) {
+        // Log and handle unexpected errors during image loading
+        System.err.println("Exception while loading image: " + e.getMessage());
+        e.printStackTrace();
+    }
+}
+
     }
 
-}

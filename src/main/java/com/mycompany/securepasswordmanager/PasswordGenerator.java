@@ -1,27 +1,22 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.securepasswordmanager;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Base64;
 
-
-//functions to generate random password not the encryption part
 public class PasswordGenerator {
 
     public static PasswordData generatePassword(int passwordLength) {
         try {
             SecretKey secretKey = generateSecretKey();
-            
-            System.out.println("Secret Key " +secretKey);
+
+            System.out.println("Secret Key: " + encodeKey(secretKey));
             // Generate a random password of specified length
             String password = generateRandomPassword(passwordLength);
-            System.out.println("Generated Password "+ password);
+            System.out.println("Generated Password: " + password);
 
             // Encrypt password with AES
             String encryptedPassword = encryptPassword(password, secretKey);
@@ -36,15 +31,18 @@ public class PasswordGenerator {
 
     private static SecretKey generateSecretKey() throws NoSuchAlgorithmException {
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-        keyGenerator.init(256); // AES-256
+        keyGenerator.init(256, new SecureRandom()); // Use SecureRandom for more robust key generation
         return keyGenerator.generateKey();
     }
 
     private static String generateRandomPassword(int length) {
-        // Implement your random password generation logic here
+        // Using SecureRandom for more secure and cross-platform randomness
+        SecureRandom random = new SecureRandom();
         StringBuilder password = new StringBuilder(length);
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_+=";
+
         for (int i = 0; i < length; i++) {
-            password.append((char) ((Math.random() * (126 - 33)) + 33)); // Printable ASCII characters
+            password.append(characters.charAt(random.nextInt(characters.length())));
         }
         return password.toString();
     }
@@ -60,4 +58,3 @@ public class PasswordGenerator {
         return Base64.getEncoder().encodeToString(secretKey.getEncoded());
     }
 }
-
