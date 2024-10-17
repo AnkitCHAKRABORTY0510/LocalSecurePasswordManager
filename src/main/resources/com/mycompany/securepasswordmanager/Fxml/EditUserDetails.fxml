@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<DialogPane xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.securepasswordmanager.EditUserDetailsController">
+   <content>
+      <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="700.0">
+         <children>
+            <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="42.0" prefWidth="660.0" text="Edit User Details" textAlignment="CENTER" textFill="#220168">
+               <font>
+                  <Font name="Avenir Black" size="24.0" />
+               </font>
+            </Label>
+            <HBox prefHeight="44.0" prefWidth="610.0">
+               <children>
+                  <Label alignment="CENTER" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="87.0" style="-fx-background-color: #252a5b; -fx-background-radius: 10; -fx-border-color: red; -fx-border-width: 1.7;" text="Label" textAlignment="CENTER" textFill="WHITE">
+                     <HBox.margin>
+                        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                     </HBox.margin>
+                     <padding>
+                        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                     </padding>
+                     <font>
+                        <Font name="Avenir Black" size="18.0" />
+                     </font>
+                  </Label>
+                  <Label alignment="CENTER" contentDisplay="CENTER" layoutX="12.0" layoutY="12.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="280.0" style="-fx-background-color: #252a5b; -fx-background-radius: 10; -fx-border-color: red; -fx-border-width: 1.7;" text="Current Details " textAlignment="CENTER" textFill="WHITE">
+                     <padding>
+                        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                     </padding>
+                     <font>
+                        <Font name="Avenir Black" size="18.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                     </HBox.margin>
+                  </Label>
+                  <Label alignment="CENTER" contentDisplay="CENTER" layoutX="101.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="280.0" style="-fx-background-color: #252a5b; -fx-background-radius: 10; -fx-border-color: red; -fx-border-width: 1.7;" text="New Details" textAlignment="CENTER" textFill="WHITE">
+                     <padding>
+                        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                     </padding>
+                     <font>
+                        <Font name="Avenir Black" size="18.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                     </HBox.margin>
+                  </Label>
+               </children>
+            </HBox>
+            <GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="305.0" prefWidth="671.0" VBox.vgrow="NEVER">
+              <columnConstraints>
+                  <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="200.0" minWidth="20.0" percentWidth="0.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="200.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="287.0" minWidth="10.0" prefWidth="200.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="80.0" style="-fx-background-color: #bcbec4; -fx-background-radius: 5;" text="UserName">
+                     <GridPane.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </GridPane.margin>
+                     <font>
+                        <Font name="Avenir Black" size="14.0" />
+                     </font>
+                     <padding>
+                        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                     </padding>
+                  </Label>
+                  <TextField fx:id="CurrentUserNameField" editable="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="275.0" promptText="Current User Name" GridPane.columnIndex="1">
+                     <font>
+                        <Font name="Avenir Roman" size="13.0" />
+                     </font>
+                  </TextField>
+                  <TextField fx:id="UserNameField" layoutX="110.0" layoutY="17.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="275.0" promptText="New Username" GridPane.columnIndex="2">
+                     <font>
+                        <Font name="Avenir Roman" size="13.0" />
+                     </font>
+                  </TextField>
+                  <Label contentDisplay="CENTER" layoutX="15.0" layoutY="17.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="80.0" style="-fx-background-color: #bcbec4; -fx-background-radius: 5;" text="FirstName" GridPane.rowIndex="1">
+                     <font>
+                        <Font name="Avenir Black" size="14.0" />
+                     </font>
+                     <padding>
+                        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                     </padding>
+                     <GridPane.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </GridPane.margin>
+                  </Label>
+                  
+                  <TextField fx:id="CurrentFirstNameField" editable="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="275.0" promptText="Current FirstName" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                     <font>
+                        <Font name="Avenir Roman" size="13.0" />
+                     </font>
+                  </TextField>
+                  <TextField fx:id="FirstNameField" layoutX="110.0" layoutY="17.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="275.0" promptText="New First Name" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                     <font>
+                        <Font name="Avenir Roman" size="13.0" />
+                     </font>
+                  </TextField>
+                  
+                  <Label contentDisplay="CENTER" layoutX="10.0" layoutY="17.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="80.0" style="-fx-background-color: #bcbec4; -fx-background-radius: 5;" text="LastName" GridPane.rowIndex="2">
+                     <font>
+                        <Font name="Avenir Black" size="14.0" />
+                     </font>
+                     <padding>
+                        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                     </padding>
+                     <GridPane.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </GridPane.margin>
+                  </Label>
+                  
+                  <TextField fx:id="CurrentLastNameField" editable="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="275.0" promptText=" Current Last Name" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                     <font>
+                        <Font name="Avenir Roman" size="13.0" />
+                     </font>
+                  </TextField>
+                  <TextField fx:id="LastNameField" layoutX="110.0" layoutY="17.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="275.0" promptText="New Last name" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                     <font>
+                        <Font name="Avenir Roman" size="13.0" />
+                     </font>
+                  </TextField>
+                  
+                  <Label contentDisplay="CENTER" layoutX="10.0" layoutY="103.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="80.0" style="-fx-background-color: #bcbec4; -fx-background-radius: 5;" text="Email-ID" GridPane.rowIndex="3">
+                     <font>
+                        <Font name="Avenir Black" size="14.0" />
+                     </font>
+                     <padding>
+                        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                     </padding>
+                     <GridPane.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </GridPane.margin>
+                  </Label>
+                  
+                  <TextField fx:id="CurrentEmailField" editable="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="275.0" promptText="Current Email-ID" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                     <font>
+                        <Font name="Avenir Roman" size="13.0" />
+                     </font>
+                  </TextField>
+                  <TextField fx:id="EmailField" layoutX="110.0" layoutY="17.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="275.0" promptText="New Email-ID" GridPane.columnIndex="2" GridPane.rowIndex="3">
+                     <font>
+                        <Font name="Avenir Roman" size="13.0" />
+                     </font>
+                  </TextField>
+                  
+                  <Label contentDisplay="CENTER" layoutX="10.0" layoutY="146.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="80.0" style="-fx-background-color: #bcbec4; -fx-background-radius: 5;" text="Password" GridPane.rowIndex="4">
+                     <font>
+                        <Font name="Avenir Black" size="14.0" />
+                     </font>
+                     <padding>
+                        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                     </padding>
+                     <GridPane.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </GridPane.margin>
+                  </Label>
+                  <TextField fx:id="CurrentPasswordField" editable="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="275.0" promptText="Current Password" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                     <font>
+                        <Font name="Avenir Roman" size="13.0" />
+                     </font>
+                  </TextField>
+                  <PasswordField fx:id="PasswordField" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="275.0" promptText="New Password" GridPane.columnIndex="2" GridPane.rowIndex="4">
+                     <font>
+                        <Font name="Avenir Roman" size="13.0" />
+                     </font>
+                  </PasswordField>
+                  <PasswordField fx:id="RetypePasswordField" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="275.0" promptText="*Retype New Password to confirm" GridPane.columnIndex="2" GridPane.rowIndex="5">
+                     <font>
+                        <Font name="Avenir Roman" size="13.0" />
+                     </font></PasswordField>
+                 
+                  
+                  <Label contentDisplay="CENTER" layoutX="10.0" layoutY="232.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="80.0" style="-fx-background-color: #bcbec4; -fx-background-radius: 5;" text="Phone-NO" GridPane.rowIndex="6">
+                     <font>
+                        <Font name="Avenir Black" size="13.0" />
+                     </font>
+                     <padding>
+                        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                     </padding>
+                     <GridPane.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </GridPane.margin>
+                  </Label>
+                  
+                  <TextField fx:id="CurrentPhoneNumberField" editable="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="275.0" promptText="Current Phone-No" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                     <font>
+                        <Font name="Avenir Roman" size="13.0" />
+                     </font>
+                  </TextField>
+                  <TextField fx:id="PhoneNumberField" layoutX="110.0" layoutY="17.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="275.0" promptText="New phone-No" GridPane.columnIndex="2" GridPane.rowIndex="6">
+                     <font>
+                        <Font name="Avenir Roman" size="13.0" />
+                     </font>
+                  </TextField>
+                  
+               </children>
+               <VBox.margin>
+                  <Insets bottom="10.0" />
+               </VBox.margin>
+            </GridPane>
+            <ButtonBar layoutX="500.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="50.0" prefWidth="660.0" VBox.vgrow="NEVER">
+              <buttons>
+                <Button defaultButton="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="70.0" style="-fx-border-radius: 4; -fx-background-color: yellow; -fx-border-width: 2; -fx-border-color: red;" text="RESET" textFill="#131a5b">
+                     <font>
+                        <Font name="Avenir Black" size="14.0" />
+                     </font>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Button>
+                  <Button cancelButton="true" defaultButton="true" layoutX="600.0" layoutY="20.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleCancel" prefHeight="30.0" prefWidth="70.0" style="-fx-background-color: red;" text="CLOSE" textFill="WHITE">
+                     <font>
+                        <Font name="Avenir Black" size="14.0" />
+                     </font>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Button>
+                  <Button defaultButton="true" layoutX="520.0" layoutY="20.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleSave" prefHeight="30.0" prefWidth="70.0" style="-fx-background-color: green;" text="OK" textFill="#fffbfb">
+                     <font>
+                        <Font name="Avenir Black" size="14.0" />
+                     </font>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Button>
+              </buttons>
+            </ButtonBar>
+         </children>
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+      </VBox>
+   </content>
+</DialogPane>
